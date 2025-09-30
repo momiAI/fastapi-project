@@ -4,6 +4,9 @@ from route.dependency import HomePagination
 from src.database import async_session_maker
 from src.models import HouseModel
 from sqlalchemy import insert, values,select
+from src.repositories.house import HouseRepository
+
+
 
 route = APIRouter(prefix="/house", tags=["Дома"])
 
@@ -14,35 +17,21 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 
 
 @route.get("/h",summary="Поиск с выборкой")
-async def get_selection_homes(selection: str,pag : HomePagination = Depends()):
+async def get_selection_homes(city: str | None = None,title : str | None = None, pag : HomePagination = Depends()):
     per_page = pag.per_page or 5 
     async with async_session_maker() as session: 
-        query = select(HouseModel).where(HouseModel.title.ilike(f"{selection}%"))
-        print(query.compile(compile_kwargs = {'literal_binds' : True})) 
-        result = await session.execute(query)
-        result = result.scalars().all()
-        return result
+        return await HouseRepository(session).get_selection(city = city, title = title, page = pag.page, per_page = per_page)
 
             
 
 
 
 
-@route.get("", summary="Вывод по айди или всех домов")
-async def get_homes(id : int | None = None,pag : HomePagination = Depends()):
+@route.get("", summary="Вывод всех домов")
+async def get_homes(pag : HomePagination = Depends()):
    per_page = pag.per_page or 5
    async with async_session_maker() as session:
-        query = select(HouseModel)
-        if id:
-            query = query.filter_by(id=id)
-        query = (query.
-                 limit(per_page).
-                 offset(per_page*(pag.page - 1))
-                )
-        print(query.compile(compile_kwargs = {"literal_binds" : True}))
-        result = await session.execute(query)
-        result = result.scalars().all()
-        return result
+        return await HouseRepository(session).get_all()
 
  
 
@@ -69,11 +58,10 @@ async def post_home(home_data : HomePUT = Body(openapi_examples={
     "rooms" : 1,
 }}})):
     async with async_session_maker() as session:
-        stmt = insert(HouseModel).values(**home_data.model_dump())
-        await session.execute(stmt)
-        await session.commit()
+        return await HouseRepository(session).insert_to_database(home_data.model_dump())
+        
 
-    return {"homes" : homes}
+    
 
 
 @route.put("/{home_id}", summary="Полное обновление дома")

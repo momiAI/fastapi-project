@@ -7,6 +7,7 @@ from src.models.house import HouseModel
 from src.models.agent import AgentModel
 from src.config import settings
 
+
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
