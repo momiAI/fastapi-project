@@ -58,34 +58,44 @@ async def post_home(home_data : HomePUT = Body(openapi_examples={
     "rooms" : 1,
 }}})):
     async with async_session_maker() as session:
-        return await HouseRepository(session).insert_to_database(home_data.model_dump())
+        result =  await HouseRepository(session).insert_to_database(home_data.model_dump())
+        await session.commit()
         
+        return {"status" : "OK", "data" : result}
 
     
 
 
-@route.put("/{home_id}", summary="Полное обновление дома")
-async def put_home(home_id : int, home_data : HomePUT = Body(openapi_examples={
+@route.put("/edit", summary="Полное обновление дома")
+async def put_home(home_search : HomePATCH, home_data : HomePUT = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
+    "title" : "Квартира в центре города с хорошим ремонтом",
     "city" : "Донецк",
     "street" : "Чижика",
-    "number" : 27
+    "number_house" : "23Б",
+    "square" : 52, 
+    "description" : "Все вопросы по телефону",
+    "number" : "+79296655331",
+    "rooms" : 2
 }},
     "2" : {"summary" : "Торез", "value" : {
+    "title" : "Дом",
     "city" : "Торез",
-    "street" : "Ульяновой",
-    "number" : 12
+    "street" : "Чижика",
+    "number_house" : "2Б",
+    "square" : 111, 
+    "description" : "Обнов",
+    "number" : "+79296655332",
+    "rooms" : 13
 }},
 
 })
 ):
-    for i in homes:
-        if i["id"] == home_id and home_data.city != None and home_data.street != None and home_data.number != None:
-            i["city"] = home_data.city
-            i["street"] = home_data.street
-            i["number"] = home_data.number
-
-    return {"homes" : homes}
+    async with async_session_maker() as session:
+        result =  await HouseRepository(session).edit_full(home_data.model_dump(),home_search.model_dump())
+        #await session.commit()
+        
+        return {"status" : "OK", "data" : result}
 
 
 @route.patch("/{home_id}", summary="Частичное обновление дома")
