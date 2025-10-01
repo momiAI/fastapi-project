@@ -14,9 +14,9 @@ class BaseRepository:
         result = await self.session.execute(query)
         return result.scalars().all()
     
-    #Доделать возврат вставленного объекта !!
+    
     async def insert_to_database(self,insert_data):
         stmt = insert(self.model).values(**insert_data).returning(self.model)
         result = await self.session.execute(stmt)
-        #await self.session.commit()
-        return result.one()
+        await self.session.commit()
+        return result.fetchone()[0]
