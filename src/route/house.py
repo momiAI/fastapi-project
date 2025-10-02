@@ -15,6 +15,11 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 
 
 
+@route.get("house/{id}",summary="Выбор объекта по айди")
+async def get_house(id : int):
+    async with async_session_maker() as session:
+        return await HouseRepository(session).get_by_id(id)
+
 
 @route.get("/h",summary="Поиск с выборкой")
 async def get_selection_homes(city: str | None = None,title : str | None = None, pag : HomePagination = Depends()):
@@ -23,10 +28,6 @@ async def get_selection_homes(city: str | None = None,title : str | None = None,
         return await HouseRepository(session).get_selection(city = city, title = title, page = pag.page, per_page = per_page)
 
             
-
-
-
-
 @route.get("", summary="Вывод всех домов")
 async def get_homes(pag : HomePagination = Depends()):
    per_page = pag.per_page or 5
@@ -34,14 +35,13 @@ async def get_homes(pag : HomePagination = Depends()):
         return await HouseRepository(session).get_all()
 
  
-
-
 @route.delete("/delete", summary="Удаление по айди" )
 async def delete_home(filter_by : HomePATCH):
     async with async_session_maker() as session:
         result = await HouseRepository(session).delete(filter_by.model_dump())
         await session.commit()
         return {"status" : "OK", "data" : result}
+
 
 @route.post("", summary="Добавление дома")
 async def post_home(home_data : HomePUT = Body(openapi_examples={
@@ -63,8 +63,6 @@ async def post_home(home_data : HomePUT = Body(openapi_examples={
         return {"status" : "OK", "data" : result}
 
     
-
-
 @route.put("/edit", summary="Полное обновление дома")
 async def put_home(home_search : HomePATCH, home_data : HomePUT = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
@@ -112,12 +110,7 @@ async def patch_home(home_id : int, home_data : HomePATCH = Body(openapi_example
 }
 
 })):
-    for i in homes:
-        if i["id"] == home_id:
-            if home_data.city:
-                i["city"] = home_data.city
-            if home_data.street:
-                i["street"] = home_data.street
-            if home_data.number:
-                i["number"] = home_data.number
-    return {"homes" : homes}
+    async with async_session_maker() as session:
+        result = await HouseRepository(session).patch_object(home_id,home_data.model_dump(exclude_unset=True))
+        await session.commit()
+        return {"status" : "OK", "data" : result}

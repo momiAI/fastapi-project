@@ -16,6 +16,7 @@ class BaseRepository:
         search = await self.session.execute(query)
         return search.scalars().one_or_none()
 
+
     async def get_all(self):
         query = select(self.model)
         result = await self.session.execute(query)
@@ -48,3 +49,12 @@ class BaseRepository:
             return result.fetchone()[0]
        
         
+    async def get_by_id(self, id : int):
+        query = select(self.model).where(self.model.id == id)
+        result = await self.session.execute(query)
+        return result.scalars().one_or_none()
+    
+    async def patch_object(self, id : int , data_patch : BaseModel):
+        stmt = update(self.model).where(self.model.id == id).values(**data_patch).returning(self.model)
+        result = await self.session.execute(stmt)
+        return result.scalars().one_or_none() 
