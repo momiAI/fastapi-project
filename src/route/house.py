@@ -36,13 +36,12 @@ async def get_homes(pag : HomePagination = Depends()):
  
 
 
-@route.delete("/{home_id}", summary="Удаление по айди" )
-async def delete_home(home_id : int):
-    for i in homes:
-        if i["id"] == home_id:
-            homes.remove(i)
-    return {"status" : "OK", "homes" : homes}
-
+@route.delete("/delete", summary="Удаление по айди" )
+async def delete_home(filter_by : HomePATCH):
+    async with async_session_maker() as session:
+        result = await HouseRepository(session).delete(filter_by.model_dump())
+        await session.commit()
+        return {"status" : "OK", "data" : result}
 
 @route.post("", summary="Добавление дома")
 async def post_home(home_data : HomePUT = Body(openapi_examples={
@@ -93,7 +92,7 @@ async def put_home(home_search : HomePATCH, home_data : HomePUT = Body(openapi_e
 ):
     async with async_session_maker() as session:
         result =  await HouseRepository(session).edit_full(home_data.model_dump(),home_search.model_dump())
-        #await session.commit()
+        await session.commit()
         
         return {"status" : "OK", "data" : result}
 

@@ -11,6 +11,7 @@ class HomePUT(BaseModel):
     description : str
     number : str
     rooms : int
+    price : int
 
 class HomePATCH(BaseModel):
     title : str | None = None
