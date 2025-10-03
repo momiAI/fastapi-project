@@ -1,6 +1,6 @@
 from fastapi import  Body, APIRouter,Depends
-from src.schemas.house import HomePUT, HomePATCH 
-from route.dependency import HomePagination
+from src.schemas.house import HomeAdd, HomePATCH 
+from route.dependency import HomeSelection, HomePagination
 from src.database import async_session_maker
 from src.models import HouseModel
 from sqlalchemy import insert, values,select
@@ -22,10 +22,10 @@ async def get_house(id : int):
 
 
 @route.get("/h",summary="Поиск с выборкой")
-async def get_selection_homes(city: str | None = None,title : str | None = None, pag : HomePagination = Depends()):
-    per_page = pag.per_page or 5 
+async def get_selection_homes(home_data : HomeSelection = Depends()):
+    per_page = home_data.per_page or 5 
     async with async_session_maker() as session: 
-        return await HouseRepository(session).get_selection(city = city, title = title, page = pag.page, per_page = per_page)
+        return await HouseRepository(session).get_selection(home_data.model_dump())
 
             
 @route.get("", summary="Вывод всех домов")
@@ -44,7 +44,7 @@ async def delete_home(filter_by : HomePATCH):
 
 
 @route.post("", summary="Добавление дома")
-async def post_home(home_data : HomePUT = Body(openapi_examples={
+async def post_home(home_data : HomeAdd = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
     "title" : "1-к Квартира бабушкин вариант",
     "city" : "Донецк",
@@ -64,7 +64,7 @@ async def post_home(home_data : HomePUT = Body(openapi_examples={
 
     
 @route.put("/edit", summary="Полное обновление дома")
-async def put_home(home_search : HomePATCH, home_data : HomePUT = Body(openapi_examples={
+async def put_home(home_search : HomePATCH, home_data : HomeAdd = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
     "title" : "Квартира в центре города с хорошим ремонтом",
     "city" : "Донецк",

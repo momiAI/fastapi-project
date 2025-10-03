@@ -2,7 +2,7 @@ from pydantic import BaseModel
 
 
 
-class HomePUT(BaseModel):
+class HomeAdd(BaseModel):
     title : str
     city : str
     street : str 
@@ -12,6 +12,10 @@ class HomePUT(BaseModel):
     number : str
     rooms : int
     price : int
+
+class House(HomeAdd):
+    id : int
+
 
 class HomePATCH(BaseModel):
     title : str | None = None

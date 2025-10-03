@@ -2,9 +2,10 @@ from sqlalchemy import select,insert,values,update,or_,delete
 from pydantic import BaseModel
 
 
-
 class BaseRepository:
     model = None
+    schema : BaseModel = None
+
 
     def __init__(self,session):
         self.session = session
@@ -20,13 +21,14 @@ class BaseRepository:
     async def get_all(self):
         query = select(self.model)
         result = await self.session.execute(query)
-        return result.scalars().all()
+        return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all()]
     
     
     async def insert_to_database(self,insert_data  : BaseModel):
         stmt = insert(self.model).values(**insert_data).returning(self.model)
         result = await self.session.execute(stmt)
-        return result.fetchone()[0]
+        model = result.fetchone()[0]
+        return [self.schema.model_validate(model, from_attributes=True)]
     
 
     async def edit_full(self, edit_data : BaseModel, filter_by : BaseModel):
@@ -36,7 +38,8 @@ class BaseRepository:
         else:
             stmt = update(self.model).where(self.model.id == objectModel.id).values(**edit_data).returning(self.model)
             result = await self.session.execute(stmt)
-            return result.fetchone()[0]
+            model = result.fetchone()[0]
+            return [self.schema.model_validate(model, from_attributes=True)]
 
     
     async def delete(self,filter_by : BaseModel):
@@ -46,15 +49,20 @@ class BaseRepository:
         else: 
             stmt = delete(self.model).where(self.model.id == objectModel.id).returning(self.model)
             result = await self.session.execute(stmt)
-            return result.fetchone()[0]
+            model =  result.fetchone()[0]
+            return [self.schema.model_validate(model, from_attributes=True)]
        
         
     async def get_by_id(self, id : int):
         query = select(self.model).where(self.model.id == id)
         result = await self.session.execute(query)
-        return result.scalars().one_or_none()
+        model = result.scalars().one_or_none()
+        return [self.schema.model_validate(model, from_attributes=True)]
+
     
+
     async def patch_object(self, id : int , data_patch : BaseModel):
         stmt = update(self.model).where(self.model.id == id).values(**data_patch).returning(self.model)
         result = await self.session.execute(stmt)
-        return result.scalars().one_or_none() 
+        model = result.scalars().one_or_none() 
+        return [self.schema.model_validate(model, from_attributes=True)]
