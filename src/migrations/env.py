@@ -5,6 +5,7 @@ from alembic import context
 from src.database import Base
 from src.models.house import HouseModel
 from src.models.agent import AgentModel
+from src.models.users import UsersModel
 from src.config import settings
 
 
