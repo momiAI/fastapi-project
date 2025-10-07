@@ -24,6 +24,14 @@ class BaseRepository:
         return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all()]
     
     
+    async def get_one_or_none(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        model = result.scalars().one_or_none()
+        if result == None:
+            return {"message" : "Объект не найден"}
+        return self.schema.model_validate(model, from_attributes= True)
+
     async def insert_to_database(self,insert_data  : BaseModel):
         stmt = insert(self.model).values(**insert_data).returning(self.model)
         result = await self.session.execute(stmt)
@@ -44,6 +52,7 @@ class BaseRepository:
     
     async def delete(self,filter_by : BaseModel):
         objectModel = await self.searching(filter_by)
+        print(objectModel)
         if objectModel == None:
             return {"message" : "Item not found"}
         else: 

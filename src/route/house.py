@@ -2,8 +2,6 @@ from fastapi import  Body, APIRouter,Depends
 from src.schemas.house import HomeAdd, HomePATCH 
 from route.dependency import HomeSelection, HomePagination
 from src.database import async_session_maker
-from src.models import HouseModel
-from sqlalchemy import insert, values,select
 from src.repositories.house import HouseRepository
 
 
