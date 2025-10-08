@@ -12,6 +12,7 @@ class UserLogin(BaseModel):
     email : EmailStr
     password : str
 
+
 class UserIncludeId(BaseModel):
     email : EmailStr
     hash_password : str
