@@ -23,7 +23,7 @@ async def register_user(data_user : UserAdd = Body(openapi_examples= {"1" : {"su
     async with async_session_maker() as session:
         result = await UserRepository(session).register(data_user_update.model_dump())
         await session.commit()
-        return(result)
+        return {"message" : "OK"}
     
 
 @route.post("/login", summary="Аутенфикация пользователя")
@@ -50,3 +50,6 @@ async def logout_user(response : Response):
 async def get_me(user_id : UserIdDep):
     async with async_session_maker() as session:
         return await UserRepository(session).get_one_or_none(id = user_id)
+
+
+#Добавить ручку на обновление с проверкой имеет ли авторизированный пользователь обновлять отель

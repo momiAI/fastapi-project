@@ -1,8 +1,8 @@
 from .base import BaseRepository
-from src.models.organization import OrganizationModel
-from src.schemas.organization import Organization
-from sqlalchemy import select
+from src.models.cottage import CottageModel
+from src.schemas.cottage import Cottage
 
-class OrganizationRepository(BaseRepository):
-    model = OrganizationModel
-    schema = Organization
+
+class CottageRepository(BaseRepository):
+    model = CottageModel
+    schema = Cottage

@@ -2,7 +2,7 @@ from src.database import Base
 from sqlalchemy.orm import Mapped,mapped_column
 from sqlalchemy import String, Integer,ForeignKey
 
-class Cottage(Base):
+class CottageModel(Base):
     __tablename__ = 'cottage'
 
     id : Mapped[int] = mapped_column(Integer,primary_key=True)

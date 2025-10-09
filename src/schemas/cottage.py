@@ -8,3 +8,10 @@ class Cottage(BaseModel):
     people : int
     price : int
     animals : bool
+
+class CottageAdd(BaseModel):
+    name_house : str
+    description : str
+    people : int
+    price : int
+    animals : bool
