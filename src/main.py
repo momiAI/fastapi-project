@@ -5,12 +5,14 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).parent.parent))
 from route.house import route as route_house
 from route.auth import route as route_auth
+from route.organization import route as route_organization
 from src.config import settings
 
 
 app = FastAPI()
 app.include_router(route_house)
 app.include_router(route_auth)
+app.include_router(route_organization)
 
 
 if __name__ == "__main__":

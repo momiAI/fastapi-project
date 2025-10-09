@@ -1,6 +1,7 @@
 from sqlalchemy import select,insert,values,update,or_,delete
 from pydantic import BaseModel
-
+from fastapi import HTTPException
+from sqlalchemy.exc import NoResultFound
 
 class BaseRepository:
     model = None
@@ -50,9 +51,17 @@ class BaseRepository:
             return [self.schema.model_validate(model, from_attributes=True)]
 
     
+    async def delete_by_id(self, id : int):
+        stmt = delete(self.model).where(self.model.id == id).returning(self.model)
+        result = await self.session.execute(stmt)
+        try:
+            return (self.schema.model_validate(result.scalars().one(),from_attributes=True))
+        except NoResultFound:
+            return HTTPException(status_code=401, detail="Объект не найден")
+
+
     async def delete(self,filter_by : BaseModel):
         objectModel = await self.searching(filter_by)
-        print(objectModel)
         if objectModel == None:
             return {"message" : "Item not found"}
         else: 

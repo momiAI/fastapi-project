@@ -3,8 +3,9 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from src.database import Base
+from src.models.organization import OrganizationModel
+from src.models.cottage import Cottage
 from src.models.house import HouseModel
-from src.models.agent import AgentModel
 from src.models.users import UsersModel
 from src.config import settings
 
