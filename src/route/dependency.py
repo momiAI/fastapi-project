@@ -1,7 +1,9 @@
 from typing import Annotated
-from pydantic import BaseModel
-from src.service.auth import authservice
 from fastapi import Query,Request,HTTPException,Depends
+from pydantic import BaseModel
+from src.utis.db_manager import DbManager
+from src.database import async_session_maker
+from src.service.auth import authservice
 
 
 class HomePagination(BaseModel):
@@ -28,3 +30,11 @@ def get_auth_user_id (token : str = Depends(get_token)):
 
 
 UserIdDep = Annotated[int, Depends(get_auth_user_id)]
+
+
+async def get_db():
+    async with DbManager(async_session_maker) as db:
+        yield db
+
+
+DbDep = Annotated[DbManager,Depends(get_db)]
