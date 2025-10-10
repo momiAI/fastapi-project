@@ -75,7 +75,7 @@ class BaseRepository:
         query = select(self.model).where(self.model.id == id)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
-        return [self.schema.model_validate(model, from_attributes=True)]
+        return self.schema.model_validate(model, from_attributes=True)
 
     
 

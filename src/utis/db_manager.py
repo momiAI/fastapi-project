@@ -2,6 +2,7 @@ from src.repositories.house import HouseRepository
 from src.repositories.users import UserRepository
 from src.repositories.cottage import CottageRepository
 from src.repositories.organization import OrganizationRepository
+from src.repositories.booking import BookingRepository
 
 
 
@@ -18,6 +19,7 @@ class DbManager:
         self.user = UserRepository(self.session)
         self.cottage = CottageRepository(self.session)
         self.organization = OrganizationRepository(self.session)
+        self.booking = BookingRepository(self.session)
 
         return self
         
