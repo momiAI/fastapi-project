@@ -1,7 +1,8 @@
-from pydantic import BaseModel
 from typing import Annotated
-from fastapi import Query,Request,HTTPException,Depends
+from pydantic import BaseModel
 from src.service.auth import authservice
+from fastapi import Query,Request,HTTPException,Depends
+
 
 class HomePagination(BaseModel):
     page : Annotated[int | None, Query(1, ge = 1)]
@@ -23,5 +24,7 @@ def get_auth_user_id (token : str = Depends(get_token)):
     if user_id is None: 
         return HTTPException(status_code=401, detail="Пользователь не найден")
     return user_id
+
+
 
 UserIdDep = Annotated[int, Depends(get_auth_user_id)]

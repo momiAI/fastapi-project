@@ -15,3 +15,10 @@ class CottageAdd(BaseModel):
     people : int
     price : int
     animals : bool
+
+class CottageUpdate(BaseModel):
+    name_house : str | None = None
+    description : str | None = None
+    people : int | None = None
+    price : int | None = None
+    animals : bool | None = None
