@@ -21,6 +21,11 @@ def get_token(request : Request):
         return HTTPException(status_code=401, detail="Пользователь не аунтифицирован")
     return token
 
+
+def get_role(token : str = Depends(get_token)):
+    user_role = authservice.decode_token(token).get("user_role",None)
+    return user_role
+
 def get_auth_user_id (token : str = Depends(get_token)):
     user_id = authservice.decode_token(token).get("user_id",None)
     if user_id is None: 
@@ -30,7 +35,7 @@ def get_auth_user_id (token : str = Depends(get_token)):
 
 
 UserIdDep = Annotated[int, Depends(get_auth_user_id)]
-
+UserRoleDep = Annotated[int, Depends(get_role)]
 
 async def get_db():
     async with DbManager(async_session_maker) as db:

@@ -2,7 +2,7 @@
 from fastapi import APIRouter,Body,HTTPException,Response
 from src.service.auth import authservice 
 from src.route.dependency import UserIdDep, DbDep
-from src.schemas.users import UserAdd,UserLogin
+from src.schemas.users import UserAdd,UserLogin,User
 
 
 route = APIRouter(prefix="/auth", tags=["Авторизация и Аутенфикация"])
@@ -17,11 +17,12 @@ async def register_user(db : DbDep,data_user : UserAdd = Body(openapi_examples= 
     "first_name" : "Last",
     "phone_number" : "+7323889911"
 }}})):
-    data_user_update = authservice.convert_data(data_user.model_dump())
+    data_user_update = authservice.converts_data(data_user.model_dump())
     result = await db.user.register(data_user_update.model_dump())
     await db.commit()
     return {"message" : "OK"}
     
+
 
 @route.post("/login", summary="Аутенфикация пользователя")
 async def login_user(db : DbDep,response : Response,data_user : UserLogin = Body(openapi_examples= {"1" : {"summary" : "Пользователь1", "value" : {
@@ -31,7 +32,7 @@ async def login_user(db : DbDep,response : Response,data_user : UserLogin = Body
     user = await db.user.get_one_or_none(email = data_user.email)
     if user is None or authservice.verify_password(data_user.password, user.hash_password) is False:
         raise HTTPException(status_code=401, detail="Проверьте корректность вводимых данных!")
-    acess_token = authservice.create_access_token({"user_id" : user.id})
+    acess_token = authservice.create_access_token({"user_id" : user.id , "user_role" : user.role })
     response.set_cookie("access_token", acess_token)
     return {"access_token" : acess_token}
     

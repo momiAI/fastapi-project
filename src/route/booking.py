@@ -1,10 +1,22 @@
-from fastapi import APIRouter
-from src.route.dependency import UserIdDep, DbDep
+from fastapi import APIRouter,HTTPException
+from src.route.dependency import UserIdDep, DbDep, UserRoleDep
 from src.schemas.booking import BookingRequest
 
 
+# Проверить ручки все сейчас мало мыслей всё работает но с пользователями !!!!
 
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
+
+@route.get("/all", summary="Получение всех броней")
+async def book_all(user_role : UserRoleDep, db : DbDep):
+    if user_role != 1:
+        return HTTPException(status_code=404, detail="Недостаточно прав")
+    return await db.booking.get_all()
+
+
+@route.get("/me", summary = "Получить бронирования пользователя")
+async def book_me(user_id : UserIdDep, db : DbDep):
+    return await db.booking.get_all_by_filter(user_id = user_id)
 
 
 @route.post("/add",summary="Забронировать коттетдж")

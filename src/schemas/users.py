@@ -7,6 +7,7 @@ class User(BaseModel):
     last_name : str
     first_name : str
     phone_number : str
+    role : int
 
 class UserLogin(BaseModel):
     email : EmailStr
@@ -19,6 +20,7 @@ class UserIncludeId(BaseModel):
     last_name : str
     first_name : str
     phone_number : str
+    role : int
 
 
 class UserAdd(BaseModel):

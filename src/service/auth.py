@@ -9,12 +9,15 @@ class AuthService:
     hashed_set = PasswordHash.recommended()
 
 
-    def convert_data(self,data_user):
+    def converts_data(self,data_user):
         user = UserIncludeId(email=data_user.get("email"), 
                              hash_password=self.hashed_set.hash(data_user.get("password")),   
                              last_name=data_user.get("last_name"),
                              first_name=data_user.get("first_name"),
-                             phone_number=data_user.get("phone_number"))
+                             phone_number=data_user.get("phone_number"),
+                             role = 1
+                             )
+                            
         return user
 
 

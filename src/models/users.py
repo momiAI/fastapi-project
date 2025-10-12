@@ -11,3 +11,4 @@ class UsersModel(Base):
     phone_number : Mapped[str] = mapped_column(String(20))
     email : Mapped[str] = mapped_column(String(200), nullable=True, unique=True)
     hash_password : Mapped[str] = mapped_column(String(200))
+    role : Mapped[int]  = mapped_column(Integer)
