@@ -3,7 +3,6 @@ from src.route.dependency import UserIdDep, DbDep, UserRoleDep
 from src.schemas.booking import BookingRequest
 
 
-# Проверить ручки все сейчас мало мыслей всё работает но с пользователями !!!!
 
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
 
@@ -27,3 +26,8 @@ async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
     result = await db.booking.insert_to_database(data_update)
     await db.commit()
     return {"message" : "OK","data" : result}
+
+@route.get("/test")
+async def testing(db : DbDep):
+    result = await db.booking.test()
+    return{"data" : result}
