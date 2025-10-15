@@ -1,10 +1,11 @@
-from fastapi import APIRouter,HTTPException
-from src.route.dependency import UserIdDep, DbDep, UserRoleDep
+from fastapi import APIRouter,HTTPException, Query,Depends
+from src.route.dependency import UserIdDep, DbDep, UserRoleDep,SerchNotBook
 from src.schemas.booking import BookingRequest
 
 
-
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
+
+
 
 @route.get("/all", summary="Получение всех броней")
 async def book_all(user_role : UserRoleDep, db : DbDep):
@@ -27,7 +28,7 @@ async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
     await db.commit()
     return {"message" : "OK","data" : result}
 
-@route.get("/test")
-async def testing(db : DbDep):
-    result = await db.booking.test()
+@route.get("/booked")
+async def booked_cottage(db : DbDep, date : SerchNotBook):
+    result = await db.booking.booked(date)
     return{"data" : result}

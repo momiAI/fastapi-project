@@ -6,6 +6,9 @@ __pycache__/
 # C extensions
 *.so
 .env
+/src/migrations/versions
+test.py
+
 # Distribution / packaging
 .Python
 build/
@@ -179,3 +182,4 @@ cython_debug/
 #  refer to https://docs.cursor.com/context/ignore-files
 .cursorignore
 .cursorindexingignore
+
