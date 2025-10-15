@@ -50,6 +50,13 @@ class BaseRepository:
             model = result.fetchone()[0]
             return [self.schema.model_validate(model, from_attributes=True)]
 
+
+    async def get_filtered(self,*filte ,**filter_by):
+        query = select(self.model).filter(*filte).filter_by(**filter_by)
+        print(query.compile(compile_kwargs = {"literal_binds" : True }))
+        result = await self.session.execute(query)
+        return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all()]
+
     
     async def delete_by_id(self, id : int):
         stmt = delete(self.model).where(self.model.id == id).returning(self.model)

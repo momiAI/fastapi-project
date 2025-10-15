@@ -29,6 +29,6 @@ async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
     return {"message" : "OK","data" : result}
 
 @route.get("/booked")
-async def booked_cottage(db : DbDep, date : SerchNotBook):
-    result = await db.booking.booked(date)
+async def booked_cottage(db : DbDep, id_org : int, date : SerchNotBook):
+    result = await db.booking.booked(id_org,date)
     return{"data" : result}
