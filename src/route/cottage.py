@@ -1,15 +1,15 @@
-from fastapi import APIRouter,Body,HTTPException
-from src.route.dependency import UserIdDep,DbDep
+from fastapi import APIRouter,Body,HTTPException,Query
+from src.route.dependency import UserIdDep,DbDep, SerchNotBook
 from src.schemas.cottage import CottageAdd,CottageUpdate
 
-route = APIRouter(prefix="/organization/{id_org}/cottage", tags=["Котетджи"])
+route = APIRouter(tags=["Котетджи"])
 
-@route.get("/{id_cott}", summary="Получение котетджа по айди")
+@route.get("/organization/{id_org}/cottage/{id_cott}", summary="Получение котетджа по айди")
 async def get_cottage(db : DbDep,id_org : int,id_cott : int): 
         return await db.cottage.get_one_or_none(id = id_cott, organization_id = id_org)
 
 
-@route.post("/add", summary="Добавление коттеджа")
+@route.post("/organization/{id_org}/cottage/add", summary="Добавление коттеджа")
 async def add_cottage(db : DbDep,id_org : int, data : CottageAdd = Body(openapi_examples={"1" : {"summary" : "Барский дом", "value" : {
     "name_house" : "Барский дом",
     "description" : "Огромный дом у речки на 8 человек",
@@ -25,7 +25,7 @@ async def add_cottage(db : DbDep,id_org : int, data : CottageAdd = Body(openapi_
     return {"message" : "OK", "data" : result } 
     
 
-@route.patch("/{id_cott}/update", summary = "Обновление коттеджа")
+@route.patch("/organization/{id_org}/cottage/{id_cott}/update", summary = "Обновление коттеджа")
 async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserIdDep, data : CottageUpdate = Body(openapi_examples={"1" : {"summary" : "Измененения 1", "value" : {
     "name_house" : "Императорский дом",
     "description" : "Ну очень огромный дом на 8 людишек",
@@ -37,3 +37,9 @@ async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserId
         return {"message" : "OK", "data" : result}
     else: 
         return HTTPException(status_code=403, detail="Пользователь не имеет право на редактирование")
+    
+
+@route.get('/booked-cottage', summary= 'Получение свободных коттеджей по дате')
+async def get_free_cottage(db : DbDep ,data : SerchNotBook, id_org : int | None = None):
+     result = await db.cottage.get_free_cottage(id_org,data)
+     return {'message' : 'OK' , 'data' : result} 
