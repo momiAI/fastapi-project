@@ -1,5 +1,5 @@
-from fastapi import APIRouter,Body,HTTPException,Query
-from src.route.dependency import UserIdDep,DbDep, SerchNotBook
+from fastapi import APIRouter,Body,HTTPException,Depends
+from src.route.dependency import UserIdDep,DbDep, SerchNotBook,HomePagination
 from src.schemas.cottage import CottageAdd,CottageUpdate
 
 route = APIRouter(tags=["Котетджи"])
@@ -7,6 +7,12 @@ route = APIRouter(tags=["Котетджи"])
 @route.get("/organization/{id_org}/cottage/{id_cott}", summary="Получение котетджа по айди")
 async def get_cottage(db : DbDep,id_org : int,id_cott : int): 
         return await db.cottage.get_one_or_none(id = id_cott, organization_id = id_org)
+
+
+@route.get('/booked-cottage', summary= 'Получение свободных коттеджей по дате')
+async def get_free_cottage(db : DbDep ,data : SerchNotBook, pag : HomePagination = Depends() ,id_org : int | None = None):
+     result = await db.cottage.get_free_cottage(id_org,data,pag)
+     return {'message' : 'OK' , 'data' : result} 
 
 
 @route.post("/organization/{id_org}/cottage/add", summary="Добавление коттеджа")
@@ -38,8 +44,3 @@ async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserId
     else: 
         return HTTPException(status_code=403, detail="Пользователь не имеет право на редактирование")
     
-
-@route.get('/booked-cottage', summary= 'Получение свободных коттеджей по дате')
-async def get_free_cottage(db : DbDep ,data : SerchNotBook, id_org : int | None = None):
-     result = await db.cottage.get_free_cottage(id_org,data)
-     return {'message' : 'OK' , 'data' : result} 

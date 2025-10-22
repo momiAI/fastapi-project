@@ -9,8 +9,8 @@ class CottageRepository(BaseRepository):
     model = CottageModel
     schema = Cottage
 
-    async def get_free_cottage(self,id_org : int, data : BaseModel):
-        query = await booked_cottage(id_org, data)
+    async def get_free_cottage(self,id_org : int, data : BaseModel, pag : BaseModel ):
+        query = await booked_cottage(id_org, data, pag)
         result = await self.session.execute(query)
         result = result.scalars().all()
         return await self.get_filtered(CottageModel.id.in_(result))

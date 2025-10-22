@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from sqlalchemy import select
 from .base import BaseRepository
-from src.repositories.utils import booked_cottage
+from src.repositories.utils import booked_cottage,booked_organization
 from src.schemas.organization import Organization
 from src.models.organization import OrganizationModel
 
@@ -18,8 +18,8 @@ class OrganizationRepository(BaseRepository):
         else: 
             return False
         
-    async def get_free_organization_by_cottage(self,id_org : int | None, data : BaseModel ):
-        query = await booked_cottage(id_org,data)
-        result = await self.session.execute()
-        result = result.scalar().all()
-        return self.get_filtered(OrganizationModel) # Не законченная функция!!!
+    async def get_free_organization_by_cottage(self, data : BaseModel ):
+        query = await booked_organization(data)
+        result = await self.session.execute(query)
+        result = result.scalars().all()
+        return await self.get_filtered(OrganizationModel.id.in_(result)) 

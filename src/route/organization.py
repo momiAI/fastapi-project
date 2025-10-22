@@ -1,11 +1,18 @@
 from fastapi import APIRouter,Body
-from src.route.dependency import UserIdDep,DbDep
+from src.route.dependency import UserIdDep,DbDep, SerchNotBook
 from src.schemas.organization import OrganizationAdd, OrganizationUpdate
 
 
 
 
 route = APIRouter(prefix="/organization", tags=["Организация"])
+
+
+@route.get('/booked', summary = "Свободные организации по дате")
+async def not_booked(db : DbDep, data : SerchNotBook):
+       result = await db.organization.get_free_organization_by_cottage(data)
+       return {'message' : 'OK' , 'data' : result} 
+
 
 @route.post("/add", summary="Регистрация организации")
 async def add_organization(db : DbDep, user_id : UserIdDep,data : OrganizationAdd = Body(openapi_examples = {"1" : {"summary" : "Дворянская поляна", "value" : {
