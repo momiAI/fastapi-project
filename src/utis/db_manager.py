@@ -3,6 +3,7 @@ from src.repositories.users import UserRepository
 from src.repositories.cottage import CottageRepository
 from src.repositories.organization import OrganizationRepository
 from src.repositories.booking import BookingRepository
+from src.repositories.facilitiec import FacilitiesCottageRepository,AsociationFacilitiesCottageRepository
 
 
 
@@ -20,7 +21,9 @@ class DbManager:
         self.cottage = CottageRepository(self.session)
         self.organization = OrganizationRepository(self.session)
         self.booking = BookingRepository(self.session)
-
+        self.facilcott = FacilitiesCottageRepository(self.session)
+        self.asociatfacilcott = AsociationFacilitiesCottageRepository(self.session)
+        
         return self
         
     async def __aexit__ (self, *args):

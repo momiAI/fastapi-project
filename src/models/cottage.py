@@ -10,5 +10,4 @@ class CottageModel(Base):
     name_house : Mapped[str] = mapped_column(String(100))
     description : Mapped[str] = mapped_column(String(400))
     people : Mapped[int] 
-    price : Mapped[int]  
-    animals : Mapped [bool]
+    price : Mapped[int] 

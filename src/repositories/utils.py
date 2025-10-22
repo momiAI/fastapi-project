@@ -21,7 +21,7 @@ async def booked_cottage(id_org : int,data : BaseModel, pag : BaseModel):
         else: 
             query = select(c.id).outerjoin(booked_cottage, c.id == booked_cottage.c.id
                                                               ).where(func.coalesce(booked_cottage.c.cottage_count,0) == 0, 
-                                                                      c.id.in_(select(c.id))).offset(pag.page * pag.per_page - 1).limit(pag.per_page)
+                                                                      c.id.in_(select(c.id))).offset(pag.page * (pag.per_page - 1)).limit(pag.per_page)
         return query
 
 async def booked_organization(data : BaseModel):

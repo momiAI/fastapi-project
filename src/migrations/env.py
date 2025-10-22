@@ -8,6 +8,7 @@ from src.models.cottage import CottageModel
 from src.models.house import HouseModel
 from src.models.users import UsersModel
 from src.models.booking import BookingModel
+from src.models.facilitiec import FacilitiesCottageModel, AsociationFacilitiesCottageModel
 from src.config import settings
 
 
