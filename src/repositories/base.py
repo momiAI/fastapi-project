@@ -34,10 +34,15 @@ class BaseRepository:
         return self.schema.model_validate(model, from_attributes= True)
 
     async def insert_to_database(self,insert_data  : BaseModel):
-        stmt = insert(self.model).values(**insert_data).returning(self.model)
+        stmt = insert(self.model).values(**insert_data.model_dump()).returning(self.model)
         result = await self.session.execute(stmt)
-        model = result.fetchone()[0]
-        return [self.schema.model_validate(model, from_attributes=True)]
+        model = result.scalars().one()
+        return self.schema.model_validate(model, from_attributes=True)
+    
+    async def insert_to_database_bulk(self,insert_data  : list[int]):
+        stmt = insert(self.model).values([i.model_dump() for i in insert_data])
+        await self.session.execute(stmt)
+        
     
 
     async def edit_full(self, edit_data : BaseModel, filter_by : BaseModel):
@@ -91,7 +96,7 @@ class BaseRepository:
     
 
     async def patch_object(self, id : int , data_patch : BaseModel):
-        stmt = update(self.model).where(self.model.id == id).values(**data_patch).returning(self.model)
+        stmt = update(self.model).where(self.model.id == id).values(**data_patch.model_dump(exclude_unset=True)).returning(self.model)
         result = await self.session.execute(stmt)
         model = result.scalars().one_or_none() 
         return [self.schema.model_validate(model, from_attributes=True)]

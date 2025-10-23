@@ -1,6 +1,6 @@
 from fastapi import APIRouter,HTTPException, Query,Depends
 from src.route.dependency import UserIdDep, DbDep, UserRoleDep,SerchNotBook
-from src.schemas.booking import BookingRequest
+from src.schemas.booking import BookingRequest,Booking
 
 
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
@@ -21,9 +21,8 @@ async def book_me(user_id : UserIdDep, db : DbDep):
 
 @route.post("/add",summary="Забронировать коттетдж")
 async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
-    data_update = data.model_dump()
-    cottage = await db.cottage.get_by_id(data_update.get("cottage_id"))
-    data_update.update(price = cottage.price, user_id = user_id)
+    cottage = await db.cottage.get_by_id(data.cottage_id)
+    data_update = Booking(price = cottage.price, user_id = user_id, **data.model_dump())
     result = await db.booking.insert_to_database(data_update)
     await db.commit()
     return {"message" : "OK","data" : result}

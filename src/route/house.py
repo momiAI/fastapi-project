@@ -49,7 +49,7 @@ async def post_home(db : DbDep,home_data : HomeAdd = Body(openapi_examples={
     "number" : "+7-323-88-99-11",
     "rooms" : 1,
 }}})):
-        result =  await db.house.insert_to_database(home_data.model_dump())
+        result =  await db.house.insert_to_database(home_data)
         await db.commit()
         return {"status" : "OK", "data" : result}
 

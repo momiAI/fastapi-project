@@ -1,3 +1,4 @@
+from sqlalchemy import select
 from pydantic import BaseModel
 from .base import BaseRepository
 from src.repositories.utils import booked_cottage
@@ -14,3 +15,4 @@ class CottageRepository(BaseRepository):
         result = await self.session.execute(query)
         result = result.scalars().all()
         return await self.get_filtered(CottageModel.id.in_(result))
+    

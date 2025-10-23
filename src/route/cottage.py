@@ -1,6 +1,7 @@
 from fastapi import APIRouter,Body,HTTPException,Depends
 from src.route.dependency import UserIdDep,DbDep, SerchNotBook,HomePagination
-from src.schemas.cottage import CottageAdd,CottageUpdate
+from src.schemas.cottage import CottageAdd,CottageUpdate, CottageToDateBase,CottageUpdateToDateBase
+from src.schemas.facilities import AsociationFacilitiesCottage
 
 route = APIRouter(tags=["Котетджи"])
 
@@ -21,26 +22,33 @@ async def add_cottage(db : DbDep,id_org : int, data : CottageAdd = Body(openapi_
     "description" : "Огромный дом у речки на 8 человек",
     "people" : 8,
     "price" : 6000,
-    "animals" : True
+    "animals" : True,
+    "facilities_ids" : [4,7,8]
 }
 }})):
-    data_update = data.model_dump()
-    data_update.setdefault("organization_id", id_org)
-    result = await db.cottage.insert_to_database(data_update)
+    data_update = CottageToDateBase(organization_id=id_org, **data.model_dump())
+    cottage = await db.cottage.insert_to_database(data_update)
+    await db.asociatfacilcott.insert_to_database_bulk([AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i) for i in data.facilities_ids])
     await db.commit()
-    return {"message" : "OK", "data" : result } 
+    return {"message" : "OK", "data" : cottage } 
     
 
 @route.patch("/organization/{id_org}/cottage/{id_cott}/update", summary = "Обновление коттеджа")
 async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserIdDep, data : CottageUpdate = Body(openapi_examples={"1" : {"summary" : "Измененения 1", "value" : {
     "name_house" : "Императорский дом",
     "description" : "Ну очень огромный дом на 8 людишек",
-    "price" : 10000
+    "price" : 10000,
+    "facilities_ids" : [5,6,9]
 }}})):
     verify = await db.organization.get_access_user_by_org(id_org=id_org,id_user=id_user)
-    if verify:
-        result = await db.cottage.patch_object(id_cott,data.model_dump(exclude_unset=True))
-        return {"message" : "OK", "data" : result}
-    else: 
+    if verify == False:
         return HTTPException(status_code=403, detail="Пользователь не имеет право на редактирование")
+    cottage = await db.cottage.patch_object(id_cott,CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
+    await db.asociatfacilcott.patch_facilities(id_cott,data.facilities_ids)
+
+    await db.session.commit()
+
+
+    return {"message" : "OK", "data" : cottage}
+    
     
