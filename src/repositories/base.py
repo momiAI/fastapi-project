@@ -2,11 +2,11 @@ from sqlalchemy import select,insert,values,update,or_,delete
 from pydantic import BaseModel
 from fastapi import HTTPException
 from sqlalchemy.exc import NoResultFound
+from src.repositories.mappers.base import DataMapper
 
 class BaseRepository:
     model = None
-    schema : BaseModel = None
-
+    mapper : DataMapper = None
 
     def __init__(self,session):
         self.session = session
@@ -22,7 +22,7 @@ class BaseRepository:
     async def get_all(self):
         query = select(self.model)
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain(model) for model in result.scalars().all()]
     
     
     async def get_one_or_none(self, **filter_by):
@@ -31,13 +31,13 @@ class BaseRepository:
         if result == None:
             return {"message" : "Объект не найден"}
         model = result.scalars().one_or_none()
-        return self.schema.model_validate(model, from_attributes= True)
+        return self.mapper.map_to_domain(model)
 
     async def insert_to_database(self,insert_data  : BaseModel):
         stmt = insert(self.model).values(**insert_data.model_dump()).returning(self.model)
         result = await self.session.execute(stmt)
         model = result.scalars().one()
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain(model)
     
     async def insert_to_database_bulk(self,insert_data  : list[int]):
         stmt = insert(self.model).values([i.model_dump() for i in insert_data])
@@ -53,20 +53,20 @@ class BaseRepository:
             stmt = update(self.model).where(self.model.id == objectModel.id).values(**edit_data).returning(self.model)
             result = await self.session.execute(stmt)
             model = result.fetchone()[0]
-            return [self.schema.model_validate(model, from_attributes=True)]
+            return self.mapper.map_to_domain(model)
 
 
     async def get_filtered(self,*filte ,**filter_by):
         query = select(self.model).filter(*filte).filter_by(**filter_by)
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all()]
+        return [self.mapper.map_to_domain(model) for model in result.scalars().all()]
 
     
     async def delete_by_id(self, id : int):
         stmt = delete(self.model).where(self.model.id == id).returning(self.model)
         result = await self.session.execute(stmt)
         try:
-            return (self.schema.model_validate(result.scalars().one(),from_attributes=True))
+            return (self.mapper.map_to_domain(result.scalars().one()))
         except NoResultFound:
             return HTTPException(status_code=401, detail="Объект не найден")
 
@@ -79,19 +79,19 @@ class BaseRepository:
             stmt = delete(self.model).where(self.model.id == objectModel.id).returning(self.model)
             result = await self.session.execute(stmt)
             model =  result.fetchone()[0]
-            return [self.schema.model_validate(model, from_attributes=True)]
+            return self.mapper.map_to_domain(model)
        
         
     async def get_by_id(self, id : int):
         query = select(self.model).where(self.model.id == id)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
-        return self.schema.model_validate(model, from_attributes=True)
+        return self.mapper.map_to_domain(model)
     
     async def get_all_by_filter(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-        return [self.schema.model_validate(model,from_attributes=True) for model in result.scalars().all() ]
+        return [self.mapper.map_to_domain(model) for model in result.scalars().all() ]
 
     
 
@@ -99,4 +99,4 @@ class BaseRepository:
         stmt = update(self.model).where(self.model.id == id).values(**data_patch.model_dump(exclude_unset=True)).returning(self.model)
         result = await self.session.execute(stmt)
         model = result.scalars().one_or_none() 
-        return [self.schema.model_validate(model, from_attributes=True)]
+        return self.mapper.map_to_domain(model)

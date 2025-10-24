@@ -5,10 +5,11 @@ from .base import BaseRepository
 from src.repositories.utils import booked_cottage,booked_organization
 from src.schemas.organization import Organization
 from src.models.organization import OrganizationModel
+from src.repositories.mappers.mappers import OrganizationMapper
 
 class OrganizationRepository(BaseRepository):
     model = OrganizationModel
-    schema = Organization
+    mapper = OrganizationMapper
 
     async def get_access_user_by_org(self,id_user : int, id_org : int):
         query = select(self.model).where(self.model.id == id_org , self.model.user_id == id_user)

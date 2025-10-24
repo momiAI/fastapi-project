@@ -3,13 +3,12 @@ from sqlalchemy import select,insert,values,update,or_,delete,func
 from src.repositories.base import BaseRepository
 from src.models.booking import BookingModel
 from src.models.cottage import CottageModel 
-from src.schemas.booking import Booking
 from src.repositories.utils import booked_cottage
-
-
+from src.repositories.mappers.mappers import BookingMapper
+ 
 class BookingRepository(BaseRepository):
     model = BookingModel
-    schema = Booking
+    mapper = BookingMapper
 
     async def free_cottage(self, id_org : int, data : BaseModel):
         query = await booked_cottage(id_org, data)

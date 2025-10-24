@@ -4,12 +4,11 @@ from pydantic import BaseModel
 from .base import BaseRepository
 from src.repositories.utils import booked_cottage
 from src.models.cottage import CottageModel
-from src.schemas.cottage import Cottage
-
+from src.repositories.mappers.mappers import CottageMapper
 
 class CottageRepository(BaseRepository):
     model = CottageModel
-    schema = Cottage
+    mapper = CottageMapper
 
     async def get_free_cottage(self,id_org : int, data : BaseModel, pag : BaseModel ):
         query = await booked_cottage(id_org, data, pag)
@@ -23,5 +22,5 @@ class CottageRepository(BaseRepository):
         if result == None:
             return {"message" : "Объект не найден"}
         model = result.unique().scalars().one_or_none()
-        return self.schema.model_validate(model, from_attributes= True)
+        return self.mapper.map_to_domain(model)
     

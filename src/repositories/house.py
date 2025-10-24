@@ -2,10 +2,11 @@ from .base import BaseRepository
 from src.models.house import HouseModel
 from src.schemas.house import House
 from sqlalchemy import select
+from src.repositories.mappers.mappers import HouseMapper
 
 class HouseRepository(BaseRepository):
     model = HouseModel
-    schema = House
+    mapper = HouseMapper
 
 
     async def get_selection(self,data_selection):
@@ -19,5 +20,5 @@ class HouseRepository(BaseRepository):
         result = await self.session.execute(query)
 
         models = result.scalars().all()
-        return [self.schema.model_validate(model,from_attributes=True) for model in models]
+        return [self.mapper.map_to_domain(model) for model in models]
 
