@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from src.schemas.facilities import FacilitiesCottage
+
 
 class Cottage(BaseModel):
     id : int
@@ -7,6 +9,7 @@ class Cottage(BaseModel):
     description : str
     people : int
     price : int
+    facilities : list[FacilitiesCottage]
     
 class CottageToDateBase(BaseModel):
     organization_id : int
