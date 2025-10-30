@@ -81,13 +81,14 @@ class BaseRepository:
             model =  result.fetchone()[0]
             return self.mapper.map_to_domain(model)
        
-        
+    
     async def get_by_id(self, id : int):
         query = select(self.model).where(self.model.id == id)
         result = await self.session.execute(query)
-        model = result.scalars().one_or_none()
+        model = result.scalars().one_or_none()       
         return self.mapper.map_to_domain(model)
     
+
     async def get_all_by_filter(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
