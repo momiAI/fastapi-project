@@ -1,4 +1,4 @@
-from fastapi import APIRouter,Body,HTTPException,Depends
+from fastapi import APIRouter,Body,HTTPException,Depends,UploadFile
 from src.route.dependency import UserIdDep,DbDep, SerchNotBook,HomePagination
 from src.schemas.cottage import CottageAdd,CottageUpdate, CottageToDateBase,CottageUpdateToDateBase
 from src.schemas.facilities import AsociationFacilitiesCottage
@@ -52,3 +52,7 @@ async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserId
     return {"message" : "OK", "data" : cottage}
     
     
+@route.post("cottage/{id_cott}/add-img", summary="Добавления картинки к котетджу")
+async def add_img_cottage(db : DbDep, id_cott : int, images : UploadFile):
+     img_stmt = await db.images.insert_to_database(images.filename)
+     asociat_stmt = await db.asociatimagecottage.insert_to_database(id_img = img_stmt.id, id_cottage = id_cott)

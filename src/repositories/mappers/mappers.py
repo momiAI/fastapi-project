@@ -5,6 +5,7 @@ from src.models.house import HouseModel
 from src.models.cottage import CottageModel
 from src.models.booking import BookingModel
 from src.models.organization import OrganizationModel
+from src.models.images import ImagesModel,AsociationImagesCottageModel
 from src.models.facilitiec import FacilitiesCottageModel,AsociationFacilitiesCottageModel
 
 from src.schemas.users import User
@@ -12,6 +13,7 @@ from src.schemas.house import House
 from src.schemas.cottage import Cottage
 from src.schemas.booking import Booking
 from src.schemas.organization import Organization
+from src.schemas.images import Image,AsociationImagesCottage
 from src.schemas.facilities import FacilitiesCottage,AsociationFacilitiesCottage
 
 class UserMapper(DataMapper):
@@ -21,6 +23,10 @@ class UserMapper(DataMapper):
 class HouseMapper(DataMapper):
     db_model = HouseModel
     db_schema = House
+
+class ImagesMapper(DataMapper):
+    db_model = ImagesModel
+    db_schema = Image
 
 class CottageMapper(DataMapper):
     db_model = CottageModel
@@ -41,3 +47,7 @@ class FacilitiesCottageMapper(DataMapper):
 class AsociationFacilitiesCottageMapper(DataMapper):
     db_model = AsociationFacilitiesCottageModel
     db_schema = AsociationFacilitiesCottage
+
+class AsociationImagesCottageMapper(DataMapper):
+    db_model = AsociationImagesCottageModel
+    db_schema = AsociationImagesCottage

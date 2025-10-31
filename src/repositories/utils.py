@@ -1,7 +1,8 @@
 from pydantic import BaseModel
-from sqlalchemy import select,func
+from sqlalchemy import select,func,insert
 from src.models.booking import BookingModel as b
 from src.models.cottage import CottageModel as c
+from src.models.images import ImagesModel as img
 from src.models.organization import OrganizationModel as o
 
 
@@ -39,4 +40,3 @@ async def booked_organization(data : BaseModel):
                                                                       c.id.in_(select(c.id))
                                                                       ).group_by(o.id)
      return query
-   

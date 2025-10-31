@@ -1,5 +1,6 @@
 from src.repositories.house import HouseRepository
 from src.repositories.users import UserRepository
+from src.repositories.images import ImagesRepository,AsociationImagesCottageRepository
 from src.repositories.cottage import CottageRepository
 from src.repositories.organization import OrganizationRepository
 from src.repositories.booking import BookingRepository
@@ -19,10 +20,12 @@ class DbManager:
         self.house = HouseRepository(self.session)
         self.user = UserRepository(self.session)
         self.cottage = CottageRepository(self.session)
+        self.images = ImagesRepository(self.session)
         self.organization = OrganizationRepository(self.session)
         self.booking = BookingRepository(self.session)
         self.facilcott = FacilitiesCottageRepository(self.session)
         self.asociatfacilcott = AsociationFacilitiesCottageRepository(self.session)
+        self.asociatimagecottage = AsociationImagesCottageRepository(self.session)
         
         return self
         

@@ -1,5 +1,7 @@
 from sqlalchemy import select,delete,insert
 from pydantic import BaseModel
+from fastapi_cache.decorator import cache
+
 from src.repositories.base import BaseRepository
 from src.models.facilitiec import FacilitiesCottageModel,AsociationFacilitiesCottageModel
 from src.schemas.facilities import FacilitiesCottage, AsociationFacilitiesCottage
@@ -14,7 +16,8 @@ class FacilitiesCottageRepository(BaseRepository):
 class AsociationFacilitiesCottageRepository(BaseRepository):
     model = AsociationFacilitiesCottageModel
     mapper = AsociationFacilitiesCottageMapper
-
+    
+    @cache
     async def patch_facilities(self,id_cottage, data : list[int]):
         query_fac = await self.session.execute(select(self.model.id_facilities).where(self.model.id_cottage == id_cottage))
         facilitiec_ids = [i for i in query_fac.scalars().all()]

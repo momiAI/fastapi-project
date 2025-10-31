@@ -13,3 +13,4 @@ class CottageModel(Base):
     price : Mapped[int] 
 
     facilities : Mapped[list["FacilitiesCottageModel"]] = relationship("FacilitiesCottageModel",secondary="facilities_and_cottage", back_populates='cottage') # type: ignore
+    images : Mapped[list["ImagesModel"]] = relationship("ImagesModel",secondary = "asociationimages", back_populates="cottage" )  # type: ignore
