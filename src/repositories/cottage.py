@@ -12,14 +12,14 @@ class CottageRepository(BaseRepository):
     model = CottageModel
     mapper = CottageMapper
 
-    @cache
+    
     async def get_free_cottage(self,id_org : int, data : BaseModel, pag : BaseModel ):
         query = await booked_cottage(id_org, data, pag)
         result = await self.session.execute(query)
         result = result.scalars().all()
         return await self.get_filtered(CottageModel.id.in_(result))
     
-    @cache
+    
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).options(joinedload(self.model.facilities)).filter_by(**filter_by)
         result = await self.session.execute(query)

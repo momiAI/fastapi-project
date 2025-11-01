@@ -1,6 +1,6 @@
 from src.repositories.base import BaseRepository
 from src.models.images import ImagesModel,AsociationImagesCottageModel
-from src.repositories.mappers import ImagesMapper,AsociationImagesCottageMapper
+from src.repositories.mappers.mappers import ImagesMapper,AsociationImagesCottageMapper
 
 
 class ImagesRepository(BaseRepository):

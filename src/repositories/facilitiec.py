@@ -17,7 +17,7 @@ class AsociationFacilitiesCottageRepository(BaseRepository):
     model = AsociationFacilitiesCottageModel
     mapper = AsociationFacilitiesCottageMapper
     
-    @cache
+   
     async def patch_facilities(self,id_cottage, data : list[int]):
         query_fac = await self.session.execute(select(self.model.id_facilities).where(self.model.id_cottage == id_cottage))
         facilitiec_ids = [i for i in query_fac.scalars().all()]

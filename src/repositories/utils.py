@@ -1,3 +1,4 @@
+import shutil
 from pydantic import BaseModel
 from sqlalchemy import select,func,insert
 from src.models.booking import BookingModel as b
@@ -40,3 +41,10 @@ async def booked_organization(data : BaseModel):
                                                                       c.id.in_(select(c.id))
                                                                       ).group_by(o.id)
      return query
+
+
+def upload_image(name,image,id_cott):
+    path = f'src/static/img/{str(id_cott) + name}'
+    with open(path,"wb+") as new_file:
+        shutil.copyfileobj(image, new_file)
+    return path
