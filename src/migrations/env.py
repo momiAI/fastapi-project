@@ -3,15 +3,8 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 from alembic import context
 from src.database import Base
-from src.models.organization import OrganizationModel
-from src.models.cottage import CottageModel
-from src.models.house import HouseModel
-from src.models.users import UsersModel
-from src.models.booking import BookingModel
-from src.models.facilitiec import FacilitiesCottageModel, AsociationFacilitiesCottageModel
-from src.models.images import ImagesModel,AsociationImagesCottageModel
 from src.config import settings
-
+from src.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
