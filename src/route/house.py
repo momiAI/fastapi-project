@@ -36,7 +36,7 @@ async def delete_home(db : DbDep,filter_by : HomePATCH):
     return {"status" : "OK", "data" : result}
 
 
-@route.post("", summary="Добавление дома")
+@route.post("/add", summary="Добавление дома")
 async def post_home(db : DbDep,home_data : HomeAdd = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
     "title" : "1-к Квартира бабушкин вариант",

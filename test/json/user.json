@@ -1,0 +1,23 @@
+[
+    {
+        "email" : "test@example.ru",
+        "password" : "password",
+        "last_name" : "User",
+        "first_name" : "Last",
+        "phone_number" : "+7323889911"
+    },
+    {
+        "email" : "mya@rob.ru",
+        "password" : "1",
+        "last_name" : "Vova",
+        "first_name" : "Last",
+        "phone_number" : "+77777777"
+    },
+    {
+        "email" : "rom@rub.ru",
+        "password" : "1223",
+        "last_name" : "Lobik",
+        "first_name" : "Koker",
+        "phone_number" : "+888888"
+    }
+]

@@ -18,7 +18,7 @@ async def register_user(db : DbDep,data_user : UserAdd = Body(openapi_examples= 
     "phone_number" : "+7323889911"
 }}})):
     data_user_update = authservice.converts_data(data_user.model_dump())
-    result = await db.user.register(data_user_update.model_dump())
+    await db.user.insert_to_database(data_user_update)
     await db.commit()
     return {"message" : "OK"}
     

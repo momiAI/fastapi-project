@@ -1,5 +1,5 @@
 from src.schemas.house import HomeAdd
-from src.database import async_session_maker
+from src.database import async_session_maker,async_session_maker_null_pool
 from src.utis.db_manager import DbManager
 
 
@@ -15,7 +15,7 @@ async def test_house_add():
         number = "+7-323-88-99-11",
         rooms = 1
     )
-    async with DbManager(session_factory=async_session_maker) as db:
+    async with DbManager(session_factory=async_session_maker_null_pool) as db:
         result = await db.house.insert_to_database(data)
         await db.commit()
 
