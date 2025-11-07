@@ -2,7 +2,7 @@ from fastapi import  Body, APIRouter,Depends
 from src.schemas.house import HomeAdd, HomePATCH 
 from route.dependency import HomeSelection, HomePagination
 from src.route.dependency import DbDep
-
+from fastapi_cache.decorator import cache
 
 
 route = APIRouter(prefix="/house", tags=["Дома"])
@@ -16,11 +16,11 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 async def get_house(id : int, db : DbDep):
     return await db.house.get_by_id(id)
 
-
+@cache
 @route.get("/h",summary="Поиск с выборкой")
 async def get_selection_homes(db : DbDep,home_data : HomeSelection = Depends()):
     per_page = home_data.per_page or 5 
-    return await db.house.get_selection(home_data.model_dump())
+    return await db.house.get_selection(home_data.model_dump(exclude_unset=True))
 
             
 @route.get("", summary="Вывод всех домов")
@@ -29,9 +29,9 @@ async def get_homes(db : DbDep,pag : HomePagination = Depends()):
    return await db.house.get_all()
 
  
-@route.delete("/delete", summary="Удаление по айди" )
-async def delete_home(db : DbDep,filter_by : HomePATCH):
-    result = await db.house.delete(filter_by.model_dump())
+@route.delete("/delete/{id_house}", summary="Удаление по айди" )
+async def delete_home(db : DbDep,id_house : int):
+    result = await db.house.delete_by_id(id_house)
     await db.commit()
     return {"status" : "OK", "data" : result}
 
@@ -79,7 +79,7 @@ async def put_home(db : DbDep,home_search : HomePATCH, home_data : HomeAdd = Bod
 
 })
 ):
-        result =  await db.house.edit_full(home_data.model_dump(),home_search.model_dump())
+        result =  await db.house.edit_full(home_data,home_search)
         await db.commit()
         return {"status" : "OK", "data" : result}
 
@@ -99,6 +99,6 @@ async def patch_home(db : DbDep,home_id : int, home_data : HomePATCH = Body(open
 }
 
 })):
-        result = await db.house.patch_object(home_id,home_data.model_dump(exclude_unset=True))
+        result = await db.house.patch_object(home_id,home_data)
         await db.commit()
         return {"status" : "OK", "data" : result}

@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Body
 from src.route.dependency import UserIdDep,DbDep, SerchNotBook
-from src.schemas.organization import OrganizationAdd, OrganizationUpdate
+from src.schemas.organization import OrganizationAdd, OrganizationUpdate,OrganizationToDateBase
 
 
 
@@ -21,8 +21,7 @@ async def add_organization(db : DbDep, user_id : UserIdDep,data : OrganizationAd
     "city" : "Донецк",
     "location" : "48.0000 37.0000"
 }}} )):
-    update_data = data.model_dump()
-    update_data.setdefault("user_id", user_id)
+    update_data = OrganizationToDateBase(user_id=user_id, **data.model_dump())
     result = await db.organization.insert_to_database(update_data)
     await db.commit()
     return result

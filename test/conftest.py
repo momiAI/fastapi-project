@@ -8,7 +8,11 @@ from src.config import settings
 from src.utis.db_manager import DbManager
 from src.database import Base,engine_null_pool
 from src.database import async_session_maker_null_pool
-
+from src.schemas.users import UserAdd
+from src.service.auth import authservice
+from src.schemas.organization import OrganizationToDateBase
+from src.schemas.cottage import CottageAdd,CottageToDateBase
+from src.schemas.facilities import AsociationFacilitiesCottage
 
 @pytest.fixture(scope='function',autouse=True)
 async def db():
@@ -46,3 +50,62 @@ async def add_data(async_main,ac):
 
     [await ac.post("/auth/register", json=j) for j in await jsoan_load(r"test\json\user.json")]
     [await ac.post("/house/add", json = j) for j in await jsoan_load(r'test\json\house.json')]
+
+
+@pytest.fixture(scope="session",autouse=True)
+async def test_register_user():
+    data = UserAdd(
+        email = "test111@example.ru",
+        password = "password",
+        last_name = "User",
+        first_name = "Last",
+        phone_number = "+7323889911"
+    )
+
+    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
+        yield db_
+
+    data_update = authservice.converts_data(data.model_dump())
+    await db_.user.insert_to_database(data_update)
+    await db_.commit()
+
+
+
+@pytest.fixture(scope="module",autouse=True)
+async def test_add_organizaion(test_register_user):
+    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
+        yield db_
+
+
+    user_id = (await db_.user.get_all())[0].id
+    data = OrganizationToDateBase(
+        user_id= user_id,
+        name = "Дворянская поляна",
+        description = "Очень большое описание",
+        city = "Донецк",
+        location = "48.0000 37.0000"
+    )
+
+    await db_.organization.insert_to_database(data)
+    await db_.commit()
+
+
+@pytest.fixture(scope="module",autouse=True)
+async def test_add_cottage(test_add_organizaion):
+    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
+        yield db_
+
+
+    id_org = (await db_.organization.get_all())[0].id
+    data = CottageAdd(
+        name_house = "Барский дом" , 
+        description = "Огромный дом у речки на 8 человек" ,
+        people = 8 , 
+        price = 6000 ,
+        animals = True,
+        facilities_ids = [1,2,3]
+    )
+    data_update = CottageToDateBase(organization_id=id_org, **data.model_dump())
+    cottage = await db_.cottage.insert_to_database(data_update)
+    await db_.asociatfacilcott.insert_to_database_bulk([AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i) for i in data.facilities_ids])
+    await db_.commit()

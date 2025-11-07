@@ -3,14 +3,14 @@ from src.models.house import HouseModel
 from src.schemas.house import House
 from sqlalchemy import select
 from src.repositories.mappers.mappers import HouseMapper
-from fastapi_cache.decorator import cache
+
 
 
 class HouseRepository(BaseRepository):
     model = HouseModel
     mapper = HouseMapper
 
-    @cache
+    
     async def get_selection(self,data_selection):
         per_page = 5 or data_selection.get("per_page")
         query = select(self.model)

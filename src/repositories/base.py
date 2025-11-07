@@ -54,7 +54,7 @@ class BaseRepository:
         if objectModel == None:
             return {"message" : "Item not found"}
         else:
-            stmt = update(self.model).where(self.model.id == objectModel.id).values(**edit_data).returning(self.model)
+            stmt = update(self.model).where(self.model.id == objectModel.id).values(**edit_data.model_dump(exclude_unset=True)).returning(self.model)
             result = await self.session.execute(stmt)
             model = result.fetchone()[0]
             return self.mapper.map_to_domain(model)
@@ -76,7 +76,7 @@ class BaseRepository:
 
     
     async def delete(self,filter_by : BaseModel):
-        objectModel = await self.searching(filter_by)
+        objectModel = await self.searching(filter_by.model_dump(exclude_unset=True))
         if objectModel == None:
             return {"message" : "Item not found"}
         else: 
@@ -101,7 +101,7 @@ class BaseRepository:
     
     
     async def patch_object(self, id : int , data_patch : BaseModel):
-        stmt = update(self.model).where(self.model.id == id).values(**data_patch.model_dump(exclude_unset=True)).returning(self.model)
+        stmt = update(self.model).where(self.model.id == id).values(**data_patch.model_dump(exclude_none=True)).returning(self.model)
         result = await self.session.execute(stmt)
         model = result.scalars().one_or_none() 
         return self.mapper.map_to_domain(model)

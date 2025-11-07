@@ -13,6 +13,9 @@ class OrganizationAdd(BaseModel):
     city : str
     location : str
 
+class OrganizationToDateBase(OrganizationAdd):
+    user_id : int
+
 class OrganizationUpdate(BaseModel):
     name : str | None = None
     description : str | None = None

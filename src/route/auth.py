@@ -48,4 +48,3 @@ async def get_me(db : DbDep,user_id : UserIdDep):
     return await db.user.get_one_or_none(id = user_id)
 
 
-#Добавить ручку на обновление с проверкой имеет ли авторизированный пользователь обновлять отель
