@@ -1,6 +1,7 @@
 from fastapi import APIRouter,HTTPException, Query,Depends
 from src.route.dependency import UserIdDep, DbDep, UserRoleDep,SerchNotBook
 from src.schemas.booking import BookingRequest,Booking
+from src.route.dependency import HomePagination
 
 
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
@@ -28,6 +29,6 @@ async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
     return {"message" : "OK","data" : result}
 
 @route.get("/booked")
-async def booked_cottage(db : DbDep, date : SerchNotBook,id_org : int | None = None):
-    result = await db.booking.free_cottage(id_org,date)
+async def booked_cottage(db : DbDep, date : SerchNotBook,id_org : int | None = None, pag : HomePagination = Depends() ):
+    result = await db.booking.free_cottage(id_org,date,pag)
     return{"data" : result}

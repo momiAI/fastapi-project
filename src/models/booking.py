@@ -9,8 +9,8 @@ class BookingModel(Base):
     __tablename__ = 'booking'
 
     id : Mapped[int] = mapped_column(Integer,primary_key=True)
-    cottage_id : Mapped[int] = mapped_column(ForeignKey("cottage.id"))
-    user_id : Mapped[int] = mapped_column(ForeignKey("users.id"))
+    cottage_id : Mapped[int] = mapped_column(ForeignKey("cottage.id",ondelete="CASCADE"))
+    user_id : Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     date_start : Mapped[date]
     date_end : Mapped[date] 
     price : Mapped[int]

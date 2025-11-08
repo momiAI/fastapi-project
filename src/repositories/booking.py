@@ -15,8 +15,8 @@ class BookingRepository(BaseRepository):
     mapper = BookingMapper
 
    
-    async def free_cottage(self, id_org : int, data : BaseModel):
-        query = await booked_cottage(id_org, data)
+    async def free_cottage(self, id_org : int, data : BaseModel, pag : BaseModel ):
+        query = await booked_cottage(id_org, data, pag)
         return await self.get_filtered(BookingModel.cottage_id.in_(query))
     
     

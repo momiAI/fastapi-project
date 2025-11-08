@@ -1,6 +1,7 @@
 import pytest
 import json
 from httpx import ASGITransport, AsyncClient
+from datetime import date
 
 from src.models import *
 from src.main import app
@@ -13,11 +14,21 @@ from src.service.auth import authservice
 from src.schemas.organization import OrganizationToDateBase
 from src.schemas.cottage import CottageAdd,CottageToDateBase
 from src.schemas.facilities import AsociationFacilitiesCottage
+from src.schemas.booking import Booking
+from src.schemas.facilities import FacilitiesCottageAdd
+
+
 
 @pytest.fixture(scope='function',autouse=True)
 async def db():
     async with DbManager(session_factory=async_session_maker_null_pool) as db:
         yield db
+
+@pytest.fixture(scope='module')
+async def db_():
+    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
+        yield db_
+
 
 
 @pytest.fixture(scope="session")
@@ -70,12 +81,8 @@ async def test_register_user():
     await db_.commit()
 
 
-
 @pytest.fixture(scope="module",autouse=True)
-async def test_add_organizaion(test_register_user):
-    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
-        yield db_
-
+async def test_add_organizaion(test_register_user,db_):
 
     user_id = (await db_.user.get_all())[0].id
     data = OrganizationToDateBase(
@@ -90,10 +97,16 @@ async def test_add_organizaion(test_register_user):
     await db_.commit()
 
 
+@pytest.fixture(scope="module",autouse = True)
+async def test_add_facilitie_cottage(db_):
+    data = ["Барбекю", "Гриль", "Лес"]
+
+    [await db_.facilcott.insert_to_database(FacilitiesCottageAdd(title = f)) for f in data]
+    await db_.commit()
+
+
 @pytest.fixture(scope="module",autouse=True)
-async def test_add_cottage(test_add_organizaion):
-    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
-        yield db_
+async def test_add_cottage(test_add_organizaion,db_,test_add_facilitie_cottage):
 
 
     id_org = (await db_.organization.get_all())[0].id
@@ -108,4 +121,21 @@ async def test_add_cottage(test_add_organizaion):
     data_update = CottageToDateBase(organization_id=id_org, **data.model_dump())
     cottage = await db_.cottage.insert_to_database(data_update)
     await db_.asociatfacilcott.insert_to_database_bulk([AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i) for i in data.facilities_ids])
+    await db_.commit()
+
+
+@pytest.fixture(scope="module",autouse=True)
+async def test_book_cottage(db_,test_add_cottage,test_register_user):
+    cottage_id = (await db_.cottage.get_all())[0].id
+    user_id = (await db_.user.get_all())[0].id
+
+    data = Booking(
+        cottage_id= cottage_id,
+        user_id=user_id,
+        date_start = date(2025,11,11),
+        date_end = date(2025,11,12),
+        price = 6000
+    )
+
+    await db_.booking.insert_to_database(data)
     await db_.commit()
