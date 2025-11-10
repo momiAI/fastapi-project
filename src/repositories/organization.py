@@ -14,8 +14,9 @@ class OrganizationRepository(BaseRepository):
     mapper = OrganizationMapper
 
 
-    @cache
+    #@cache
     async def get_access_user_by_org(self,id_user : int, id_org : int):
+        
         query = select(self.model).where(self.model.id == id_org , self.model.user_id == id_user)
         result = await self.session.execute(query)
         try:

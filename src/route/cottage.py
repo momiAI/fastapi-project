@@ -49,7 +49,8 @@ async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserId
     if verify == False:
         return HTTPException(status_code=403, detail="Пользователь не имеет право на редактирование")
     cottage = await db.cottage.patch_object(id_cott,CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
-    await db.asociatfacilcott.patch_facilities(id_cott,data.facilities_ids)
+    if data.facilities_ids:
+        await db.asociatfacilcott.patch_facilities(id_cott,data.facilities_ids)
 
     await db.session.commit()
 

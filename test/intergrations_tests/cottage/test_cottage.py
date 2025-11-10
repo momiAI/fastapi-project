@@ -4,27 +4,47 @@ from src.schemas.cottage import CottageAdd,CottageToDateBase,CottageUpdateToDate
 from src.schemas.facilities import AsociationFacilitiesCottage
 
 
-async def test_get(db): 
-
-    await db.cottage.get_one_or_none(id = 1, organization_id = 1)
-
-
-async def test_get_free_cottge(db):
-
-    id_org = (await db.organization.get_all())[0].id
-    date_data = DateDep(date_start=date(2025,11,7) , date_end=date(2025,11,8) )
-    pag = HomePagination(page = 1, per_page=2)
-
-    await db.cottage.get_free_cottage(id_org,date_data,pag)
+async def test_get(ac,db): 
+    response = await ac.get("/organization/1/cottage/1")
+    assert response.status_code == 200
 
 
-async def update_cottage(db):
+async def test_get_free_cottge(ac):
+    response = await ac.get("/booked-cottage", params= {
+        "date_start" : "2025-11-07",
+        "date_end" : "2025-11-08"
+    })
+
+    assert response.status_code == 200
+
+
+async def test_add_cottage(ac,db):
+    organization_id = (await db.organization.get_all())[0].id
+    response = await ac.post(f"/organization/{organization_id}/cottage/add", 
+        params = {
+            "organization_id" : int(organization_id)
+        },
+        json = {
+            "name_house" : "Ванькин дом",
+            "description" : "Большой дом",
+            "people" : 8,
+            "price" : 8000,
+            "facilities_ids" : (4,5,6)
+    })
+    res = response.json()
+    assert res["message"] == "OK"
+
+
+async def test_update_cottage(db,test_auth_user_ac,test_add_cottage):
     id_cott = (await db.cottage.get_all())[0].id
-    cottage = CottageUpdateToDateBase(
-        name_house = "Императорский дом",
-        description = "Ну очень огромный дом на 8 людишек",
-        price = 10000,
+    response = await test_auth_user_ac.patch(
+        f"/organization/1/cottage/{id_cott}/update",
+        json = {
+            "name_house" : "Императорский дом",
+            "description" : "Ну очень огромный дом на 8 людишек",
+            "price" : 10000,
+            "facilities_ids" : [5,6,9]
+        }
     )
-    await db.cottage.patch_object(id_cott,cottage)
-    await db.asociatfacilcott.patch_facilities(id_cott,[1,2,3])
-    await db.session.commit()
+    res = response.json()
+    assert res["message"] == "OK"

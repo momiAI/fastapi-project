@@ -11,7 +11,7 @@ tomorrow = today + timedelta(1)
 
 class HomePagination(BaseModel):
     page : Annotated[int | None, Query(1, ge = 1)]
-    per_page : Annotated[int | None,Query(None, ge=0, lt= 30)]
+    per_page : Annotated[int | None,Query(5, ge=0, lt= 30)]
 
 
 class HomeSelection(HomePagination):

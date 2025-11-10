@@ -24,6 +24,6 @@ class AsociationFacilitiesCottageRepository(BaseRepository):
         add_facilities = set(data) - set(facilitiec_ids)
         add_dict = [{"id_cottage" : id_cottage , "id_facilities" : i} for i in add_facilities]
         stmt_delete = delete(self.model).where(self.model.id_cottage == id_cottage, self.model.id_facilities.in_(data))
-        stmt_inser = insert(self.model).values(*add_dict)
+        stmt_inser = insert(self.model).values(add_dict)
         await self.session.execute(stmt_delete)
         await self.session.execute(stmt_inser)

@@ -9,6 +9,7 @@ from src.models.organization import OrganizationModel as o
 
 
 async def booked_cottage(id_org : int,data : BaseModel, pag : BaseModel):
+        per_page = 5 or pag.per_page
         booked_cottage = select(c.id,
                                 c.price,
                                 func.count('*').label('cottage_count')
@@ -19,11 +20,11 @@ async def booked_cottage(id_org : int,data : BaseModel, pag : BaseModel):
         if id_org is not None:
             query = select(c.id).outerjoin(booked_cottage, c.id == booked_cottage.c.id
                                                               ).where(func.coalesce(booked_cottage.c.cottage_count,0) == 0, 
-                                                                      c.id.in_(select(c.id).where(c.organization_id == id_org))).offset(pag.page).limit(pag.per_page)
+                                                                      c.id.in_(select(c.id).where(c.organization_id == id_org))).offset(pag.page).limit(per_page)
         else: 
             query = select(c.id).outerjoin(booked_cottage, c.id == booked_cottage.c.id
                                                               ).where(func.coalesce(booked_cottage.c.cottage_count,0) == 0, 
-                                                                      c.id.in_(select(c.id))).offset(pag.page * (pag.per_page - 1)).limit(pag.per_page)
+                                                                      c.id.in_(select(c.id))).offset(pag.page * (per_page - 1)).limit(per_page)
         return query
 
 async def booked_organization(data : BaseModel):

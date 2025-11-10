@@ -2,12 +2,15 @@ import pytest
 import json
 from httpx import ASGITransport, AsyncClient
 from datetime import date
+from unittest import mock
+
+mock.patch('fastapi_cache.decorator.cache', lambda *args, **kwargs: lambda f:f).start()
 
 from src.models import *
 from src.main import app
 from src.config import settings
 from src.utis.db_manager import DbManager
-from src.database import Base,engine_null_pool
+from src.database import Base,engine
 from src.database import async_session_maker_null_pool
 from src.schemas.users import UserAdd
 from src.service.auth import authservice
@@ -18,17 +21,16 @@ from src.schemas.booking import Booking
 from src.schemas.facilities import FacilitiesCottageAdd
 
 
-
 @pytest.fixture(scope='function',autouse=True)
 async def db():
     async with DbManager(session_factory=async_session_maker_null_pool) as db:
         yield db
 
+
 @pytest.fixture(scope='module')
 async def db_():
     async with DbManager(session_factory=async_session_maker_null_pool) as db_:
         yield db_
-
 
 
 @pytest.fixture(scope="session")
@@ -42,7 +44,7 @@ async def async_main():
     assert settings.MODE == "TEST"
 
 
-    async with engine_null_pool.begin() as conn:
+    async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
 
@@ -58,13 +60,11 @@ async def add_data(async_main,ac):
             data = json.load(f)
         return data 
 
-
-    [await ac.post("/auth/register", json=j) for j in await jsoan_load(r"test\json\user.json")]
     [await ac.post("/house/add", json = j) for j in await jsoan_load(r'test\json\house.json')]
 
 
 @pytest.fixture(scope="session",autouse=True)
-async def test_register_user():
+async def test_register_user(ac):
     data = UserAdd(
         email = "test111@example.ru",
         password = "password",
@@ -72,14 +72,21 @@ async def test_register_user():
         first_name = "Last",
         phone_number = "+7323889911"
     )
+    response = await ac.post("/auth/register",json=data.model_dump())
+    res = response.json()
+    assert res["message"] == "OK"
+    
 
-    async with DbManager(session_factory=async_session_maker_null_pool) as db_:
-        yield db_
 
-    data_update = authservice.converts_data(data.model_dump())
-    await db_.user.insert_to_database(data_update)
-    await db_.commit()
-
+@pytest.fixture(scope="session",autouse = True)
+async def test_auth_user_ac(ac,test_register_user):
+    response = await ac.post("/auth/login", json = {"email" : "test111@example.ru",
+                                             "password" : "password"})
+    res = response.json()
+    assert response.status_code == 200
+    assert "access_token" in res
+    yield ac
+                                            
 
 @pytest.fixture(scope="module",autouse=True)
 async def test_add_organizaion(test_register_user,db_):
