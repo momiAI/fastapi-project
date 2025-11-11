@@ -35,7 +35,7 @@ async def test_add_cottage(ac,db):
     assert res["message"] == "OK"
 
 
-async def test_update_cottage(db,test_auth_user_ac,test_add_cottage):
+async def test_update_cottage(db,test_auth_user_ac,test_add_cottage,test_add_facilitie_cottage):
     id_cott = (await db.cottage.get_all())[0].id
     response = await test_auth_user_ac.patch(
         f"/organization/1/cottage/{id_cott}/update",
@@ -43,7 +43,7 @@ async def test_update_cottage(db,test_auth_user_ac,test_add_cottage):
             "name_house" : "Императорский дом",
             "description" : "Ну очень огромный дом на 8 людишек",
             "price" : 10000,
-            "facilities_ids" : [5,6,9]
+            "facilities_ids" : [3,4,5]
         }
     )
     res = response.json()

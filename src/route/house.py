@@ -12,20 +12,18 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 
 
 
-@route.get("house/{id}",summary="Выбор объекта по айди")
+@route.get("/by/{id}",summary="Выбор объекта по айди")
 async def get_house(id : int, db : DbDep):
     return await db.house.get_by_id(id)
 
 @cache
-@route.get("/h",summary="Поиск с выборкой")
+@route.get("/selection",summary="Поиск с выборкой")
 async def get_selection_homes(db : DbDep,home_data : HomeSelection = Depends()):
-    per_page = home_data.per_page or 5 
     return await db.house.get_selection(home_data.model_dump(exclude_unset=True))
 
-            
-@route.get("", summary="Вывод всех домов")
-async def get_homes(db : DbDep,pag : HomePagination = Depends()):
-   per_page = pag.per_page or 5
+@cache            
+@route.get("/all", summary="Вывод всех домов")
+async def get_homes(db : DbDep):
    return await db.house.get_all()
 
  
@@ -43,7 +41,7 @@ async def post_home(db : DbDep,home_data : HomeAdd = Body(openapi_examples={
     "city" : "Донецк",
     "street" : "Чижика",
     "number_house" : "2А",
-    "square" : 38,
+    "square" : "38",
     "price" : 400000,
     "description" : "Продаётся там там та и т.д ",
     "number" : "+7-323-88-99-11",
@@ -54,7 +52,7 @@ async def post_home(db : DbDep,home_data : HomeAdd = Body(openapi_examples={
         return {"status" : "OK", "data" : result}
 
     
-@route.put("/edit", summary="Полное обновление дома")
+@route.put("/put", summary="Полное обновление дома")
 async def put_home(db : DbDep,home_search : HomePATCH, home_data : HomeAdd = Body(openapi_examples={
     "1" : {"summary" : "Донецк", "value" : {
     "title" : "Квартира в центре города с хорошим ремонтом",
@@ -84,17 +82,17 @@ async def put_home(db : DbDep,home_search : HomePATCH, home_data : HomeAdd = Bod
         return {"status" : "OK", "data" : result}
 
 
-@route.patch("/{home_id}", summary="Частичное обновление дома")
+@route.patch("/patch/{home_id}", summary="Частичное обновление дома")
 async def patch_home(db : DbDep,home_id : int, home_data : HomePATCH = Body(openapi_examples={
     "1" : {"summary" : "Без улицы", "value" : {
         "city" : "Торез",
-        "number" : 33
+        "number" : "33"
     }
 },
     "2" : {
     "summary" : "Без города", "value" : {
         "street" : "Чижика",
-        "number" : 21
+        "number" : "21"
     }
 }
 

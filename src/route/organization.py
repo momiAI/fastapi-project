@@ -39,6 +39,6 @@ async def update_organization(db : DbDep, id : int, data : OrganizationUpdate = 
     "name" : "Белая роща",
     "description" : "Ну очень большое описание"
 }}})):
-        result = await db.organization.patch_object(id,data.model_dump(exclude_unset= True))
+        result = await db.organization.patch_object(id,data)
         await db.commit()
         return result

@@ -33,7 +33,7 @@ def resize_image(image_path: str):
 
         
         output_path = os.path.join(output_folder, new_file_name)
-        print(output_path)
+        
         
         img_resized.save(output_path)
 
