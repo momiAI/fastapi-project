@@ -106,7 +106,7 @@ async def test_add_organizaion(test_register_user,db_):
 
 @pytest.fixture(scope="module",autouse = True)
 async def test_add_facilitie_cottage(db_):
-    data = ["Барбекю", "Гриль", "Лес"]
+    data = ["Барбекю", "Гриль", "Лес", "Ставок", "Рыбалка", "Горы"]
 
     [await db_.facilcott.insert_to_database(FacilitiesCottageAdd(title = f)) for f in data]
     await db_.commit()

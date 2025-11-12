@@ -1,12 +1,19 @@
 import shutil
 from pydantic import BaseModel
+from datetime import date
 from sqlalchemy import select,func,insert
+
 from src.models.booking import BookingModel as b
 from src.models.cottage import CottageModel as c
 from src.models.images import ImagesModel as img
 from src.models.organization import OrganizationModel as o
 
-
+async def booked_cottages(id_cott : int, date_start : date, date_end : date):
+     query = select(b.cottage_id).where(b.cottage_id == id_cott,
+                                        b.date_end >= date_start,
+                                        b.date_start <= date_end
+                                        )
+     return query
 
 async def booked_cottage(id_org : int,data : BaseModel, pag : BaseModel):
         per_page = 5 or pag.per_page

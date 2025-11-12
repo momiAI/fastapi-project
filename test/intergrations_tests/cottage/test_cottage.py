@@ -1,4 +1,6 @@
+import pytest
 from datetime import date
+
 from src.route.dependency import HomePagination,DateDep
 from src.schemas.cottage import CottageAdd,CottageToDateBase,CottageUpdateToDateBase
 from src.schemas.facilities import AsociationFacilitiesCottage
@@ -17,19 +19,23 @@ async def test_get_free_cottge(ac):
 
     assert response.status_code == 200
 
-
-async def test_add_cottage(ac,db):
+@pytest.mark.parametrize("name_house, description, people, price, facilities_ids", [
+    ("Ванькин дом","Большой дом",8,8000,(1,2,3)),
+    ("Болото дом","Огромный дом",10,16000,(1,2,3)),
+    ("Огонь дом","Пылающий дом",7,66000,(1,2,3))
+])
+async def test_add_cottage(name_house, description, people, price, facilities_ids,ac,db):
     organization_id = (await db.organization.get_all())[0].id
     response = await ac.post(f"/organization/{organization_id}/cottage/add", 
         params = {
             "organization_id" : int(organization_id)
         },
         json = {
-            "name_house" : "Ванькин дом",
-            "description" : "Большой дом",
-            "people" : 8,
-            "price" : 8000,
-            "facilities_ids" : (4,5,6)
+            "name_house" : name_house,
+            "description" : description,
+            "people" : people,
+            "price" : price,
+            "facilities_ids" : facilities_ids
     })
     res = response.json()
     assert res["message"] == "OK"
@@ -43,7 +49,7 @@ async def test_update_cottage(db,test_auth_user_ac,test_add_cottage,test_add_fac
             "name_house" : "Императорский дом",
             "description" : "Ну очень огромный дом на 8 людишек",
             "price" : 10000,
-            "facilities_ids" : [3,4,5]
+            "facilities_ids" : [3,2,4]
         }
     )
     res = response.json()
