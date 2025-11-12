@@ -30,9 +30,9 @@ class BaseRepository:
     async def get_one_or_none(self, **filter_by):
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
-        if result == None:
-            return {"message" : "Объект не найден"}
         model = result.scalars().one_or_none()
+        if model == None:
+            return None
         return self.mapper.map_to_domain(model)
     
     
