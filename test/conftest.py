@@ -70,7 +70,7 @@ async def test_register_user(ac):
         password = "password",
         last_name = "User",
         first_name = "Last",
-        phone_number = "+7323889911"
+        phone_number = "+7321457691"
     )
     response = await ac.post("/auth/register",json=data.model_dump())
     res = response.json()

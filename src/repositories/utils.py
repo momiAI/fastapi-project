@@ -15,6 +15,14 @@ async def booked_cottages(id_cott : int, date_start : date, date_end : date):
                                         )
      return query
 
+
+async def check_valid_number(phone_number : str):
+     if phone_number[0] == "+" and len(phone_number) == 11 and (phone_number[1] == 7 or phone_number[1] == 8):
+          return True
+     else:
+          False
+
+
 async def booked_cottage(id_org : int,data : BaseModel, pag : BaseModel):
         per_page = 5 or pag.per_page
         booked_cottage = select(c.id,

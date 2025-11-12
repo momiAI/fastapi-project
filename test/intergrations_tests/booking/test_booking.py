@@ -48,15 +48,15 @@ async def test_booked_cottage(test_auth_user_ac):
     (1,"2025-11-07", "2025-11-08", 1,401),
     (1,"2025-11-09", "2025-11-10", 2,200)
 ])
-async def test_booked_and_me_routes(ac,delete_bookings, 
+async def test_booked_and_me_routes(test_auth_user_ac,delete_bookings, 
                                     cottage_id, date_start, date_end,status_code, count):
-    response_post = await ac.post("/booking/add", json = {
+    response_post = await test_auth_user_ac.post("/booking/add", json = {
             "cottage_id" : cottage_id,
             "date_start" : date_start,
             "date_end"   : date_end
     })
     assert response_post.status_code == status_code
-    response = await ac.get("/booking/me")
+    response = await test_auth_user_ac.get("/booking/me")
     res = response.json()
     assert len(res) == count
 
