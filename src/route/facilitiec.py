@@ -1,6 +1,6 @@
 from fastapi import APIRouter,Body
 from src.route.dependency import DbDep
-from src.schemas.facilities import FacilitiesCottageAdd, AsociationFacilitiesCottage
+from src.schemas.facilities import FacilitiesCottageAdd
 
 route  = APIRouter(prefix = '/facilitiec', tags= ['Удобвства для коттеджей'])
 

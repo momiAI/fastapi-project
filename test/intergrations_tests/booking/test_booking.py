@@ -1,8 +1,5 @@
 import pytest
-from datetime import date
 
-from src.schemas.booking import Booking
-from src.route.dependency import DateDep,HomePagination
 
 
 @pytest.fixture(scope="module")

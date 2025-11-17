@@ -1,6 +1,5 @@
 from .base import BaseRepository
 from src.models.house import HouseModel
-from src.schemas.house import House
 from sqlalchemy import select
 from src.repositories.mappers.mappers import HouseMapper
 

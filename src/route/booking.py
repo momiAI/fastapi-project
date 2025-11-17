@@ -1,8 +1,8 @@
-from fastapi import APIRouter,HTTPException, Query,Depends
+from fastapi import APIRouter,HTTPException,Depends
 from src.route.dependency import UserIdDep, DbDep, UserRoleDep,SerchNotBook
 from src.schemas.booking import BookingRequest,Booking
 from src.route.dependency import HomePagination
-from src.utis.exception import CottageBooked
+
 
 
 route = APIRouter(prefix="/booking", tags=["Бронирование"])
@@ -24,7 +24,7 @@ async def book_me(user_id : UserIdDep, db : DbDep):
 @route.post("/add",summary="Забронировать коттетдж")
 async def book_cottage(user_id : UserIdDep, db : DbDep,data : BookingRequest):
     check = await db.booking.booked_cottage_or_no(data.cottage_id,data.date_start,data.date_end)
-    if check == False:
+    if not check:
         raise HTTPException(status_code=401, detail="Котетдж уже забронирован")
     cottage = await db.cottage.get_by_id(data.cottage_id)
     data_update = Booking(price = cottage.price, user_id = user_id, **data.model_dump())

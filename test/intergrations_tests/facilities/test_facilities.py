@@ -1,4 +1,4 @@
-from src.schemas.facilities import FacilitiesCottageAdd
+
 
 
 async def test_get_all(ac):

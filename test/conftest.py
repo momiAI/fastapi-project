@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 import pytest
 import json
 from httpx import ASGITransport, AsyncClient
@@ -6,19 +7,17 @@ from unittest import mock
 
 mock.patch('fastapi_cache.decorator.cache', lambda *args, **kwargs: lambda f:f).start()
 
-from src.models import *
+from src.models import * #noqa: F403
 from src.main import app
 from src.config import settings
 from src.utis.db_manager import DbManager
-from src.database import Base,engine
-from src.database import async_session_maker_null_pool
+from src.database import Base,engine,async_session_maker_null_pool
 from src.schemas.users import UserAdd
-from src.service.auth import authservice
 from src.schemas.organization import OrganizationToDateBase
 from src.schemas.cottage import CottageAdd,CottageToDateBase
-from src.schemas.facilities import AsociationFacilitiesCottage
+from src.schemas.facilities import AsociationFacilitiesCottage,FacilitiesCottageAdd
 from src.schemas.booking import Booking
-from src.schemas.facilities import FacilitiesCottageAdd
+
 
 
 @pytest.fixture(scope='function',autouse=True)

@@ -1,11 +1,10 @@
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.exc import NoResultFound
-from fastapi_cache.decorator import cache
+
 
 from .base import BaseRepository
-from src.repositories.utils import booked_cottage,booked_organization
-from src.schemas.organization import Organization
+from src.repositories.utils import booked_organization
 from src.models.organization import OrganizationModel
 from src.repositories.mappers.mappers import OrganizationMapper
 

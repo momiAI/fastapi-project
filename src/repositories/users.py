@@ -13,12 +13,12 @@ class UserRepository(BaseRepository):
     async def check_number(self,phone_number):
         print(phone_number)
         check_number_in_correct = await check_valid_number(phone_number)
-        if check_number_in_correct == False:
+        if not check_number_in_correct:
             return False
         query = select(self.model).where(self.model.phone_number == phone_number)
         promt = await self.session.execute(query)
         result = promt.scalars().one_or_none()
-        if result == None:
+        if result is None:
             return True
         else:
             return False

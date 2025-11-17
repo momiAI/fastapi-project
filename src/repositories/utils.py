@@ -1,11 +1,10 @@
 import shutil
 from pydantic import BaseModel
 from datetime import date
-from sqlalchemy import select,func,insert
+from sqlalchemy import select,func
 
 from src.models.booking import BookingModel as b
 from src.models.cottage import CottageModel as c
-from src.models.images import ImagesModel as img
 from src.models.organization import OrganizationModel as o
 
 async def booked_cottages(id_cott : int, date_start : date, date_end : date):

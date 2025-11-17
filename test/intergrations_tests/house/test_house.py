@@ -1,5 +1,4 @@
-from src.schemas.house import HomeAdd,HomePATCH
-from src.route.dependency import HomeSelection
+
 
 
 async def test_get_by_id(ac):
@@ -11,7 +10,6 @@ async def test_get_by_selection(ac):
     response = await ac.get("/house/selection", params = {
         "city" : "Донецк"
     })
-    res = response.json()
     assert response.status_code == 200
 
 
@@ -21,17 +19,6 @@ async def test_get_all(ac):
 
 
 async def test_house_add(ac):
-    data = HomeAdd(
-        title = "1-к Квартира бабушкин вариант",
-        city = "Донецк",
-        street = "Чижика",
-        number_house = "2А",
-        square = 38,
-        price = 400000,
-        description = "Продаётся там там та и т.д" ,
-        number = "+7-323-88-99-11",
-        rooms = 1
-    )
     response = await ac.post("/house/add",
                              json = {
                                 "title" : "1-к Квартира бабушкин вариант",

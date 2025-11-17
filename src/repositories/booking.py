@@ -1,11 +1,9 @@
-from fastapi_cache.decorator import cache
 from pydantic import BaseModel
-from sqlalchemy import select,insert,values,update,or_,delete,func
+from sqlalchemy import delete
 from datetime import date
 
 from src.repositories.base import BaseRepository
 from src.models.booking import BookingModel
-from src.models.cottage import CottageModel 
 from src.repositories.utils import booked_cottage,booked_cottages
 from src.repositories.mappers.mappers import BookingMapper
 

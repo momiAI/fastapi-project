@@ -1,6 +1,4 @@
-from .config import settings
-from .database import *
-
+from .database import * #noqa: F403
 from src.connectors.redis_maneger import RedisManager
 from src.config import settings
 

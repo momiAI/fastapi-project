@@ -1,6 +1,6 @@
 from fastapi import  Body, APIRouter,Depends
 from src.schemas.house import HomeAdd, HomePATCH 
-from route.dependency import HomeSelection, HomePagination
+from route.dependency import HomeSelection
 from src.route.dependency import DbDep
 from fastapi_cache.decorator import cache
 

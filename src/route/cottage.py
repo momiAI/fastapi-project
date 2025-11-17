@@ -46,7 +46,7 @@ async def update_cottage(db : DbDep,id_org : int ,id_cott : int,id_user : UserId
     "facilities_ids" : [5,6,9]
 }}})):
     verify = await db.organization.get_access_user_by_org(id_org=id_org,id_user=id_user)
-    if verify == False:
+    if not verify:
         return HTTPException(status_code=403, detail="Пользователь не имеет право на редактирование")
     cottage = await db.cottage.patch_object(id_cott,CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
     if data.facilities_ids:

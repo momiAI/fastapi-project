@@ -1,7 +1,6 @@
-import asyncio
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from .config import settings
-from sqlalchemy import text,NullPool
+from sqlalchemy import NullPool
 from sqlalchemy.orm import DeclarativeBase
 
 

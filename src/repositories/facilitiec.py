@@ -1,10 +1,7 @@
 from sqlalchemy import select,delete,insert
-from pydantic import BaseModel
-from fastapi_cache.decorator import cache
 
 from src.repositories.base import BaseRepository
 from src.models.facilitiec import FacilitiesCottageModel,AsociationFacilitiesCottageModel
-from src.schemas.facilities import FacilitiesCottage, AsociationFacilitiesCottage
 from src.repositories.mappers.mappers import FacilitiesCottageMapper,AsociationFacilitiesCottageMapper
 
 

@@ -1,7 +1,7 @@
 from sqlalchemy import select 
-from sqlalchemy.orm import selectinload,joinedload
+from sqlalchemy.orm import joinedload
 from pydantic import BaseModel
-from fastapi_cache.decorator import cache
+
 
 from .base import BaseRepository
 from src.repositories.utils import booked_cottage
@@ -24,7 +24,7 @@ class CottageRepository(BaseRepository):
         query = select(self.model).options(joinedload(self.model.facilities)).filter_by(**filter_by)
         result = await self.session.execute(query)
         model = result.unique().scalars().one_or_none()
-        if model == None:
+        if model is None:
             return {"message" : "Объект не найден"}
         return self.mapper.map_to_domain(model)
     

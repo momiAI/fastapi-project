@@ -1,7 +1,4 @@
 import pytest
-from src.schemas.users import UserAdd
-from src.service.auth import authservice
-
 
 @pytest.mark.parametrize("email,password,last_name,first_name,phone_number,status_code",[
     ("test@example.ru","password","Last","User","+7856732341", 200),

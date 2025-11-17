@@ -2,7 +2,7 @@
 from fastapi import APIRouter,Body,HTTPException,Response
 from src.service.auth import authservice 
 from src.route.dependency import UserIdDep, DbDep
-from src.schemas.users import UserAdd,UserLogin,User
+from src.schemas.users import UserAdd,UserLogin
 
 
 route = APIRouter(prefix="/auth", tags=["Авторизация и Аутенфикация"])
@@ -18,7 +18,7 @@ async def register_user(db : DbDep,data_user : UserAdd = Body(openapi_examples= 
     "phone_number" : "+7323889911"
 }}})):
     check = await db.user.check_number(data_user.phone_number)
-    if check == False:
+    if not check :
         raise HTTPException(status_code=400, detail= "Некоректные данные")
     data_user_update = authservice.converts_data(data_user.model_dump())
     await db.user.insert_to_database(data_user_update)

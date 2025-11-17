@@ -1,4 +1,4 @@
-from sqlalchemy import select,insert,values,update,or_,delete
+from sqlalchemy import select,insert,update,delete
 from pydantic import BaseModel
 from fastapi import HTTPException
 from sqlalchemy.exc import NoResultFound
@@ -31,7 +31,7 @@ class BaseRepository:
         query = select(self.model).filter_by(**filter_by)
         result = await self.session.execute(query)
         model = result.scalars().one_or_none()
-        if model == None:
+        if model is None:
             return None
         return self.mapper.map_to_domain(model)
     
@@ -51,7 +51,7 @@ class BaseRepository:
     
     async def edit_full(self, edit_data : BaseModel, filter_by : BaseModel):
         objectModel = await self.searching(filter_by)
-        if objectModel == None:
+        if objectModel is None:
             return {"message" : "Item not found"}
         else:
             stmt = update(self.model).where(self.model.id == objectModel.id).values(**edit_data.model_dump(exclude_unset=True)).returning(self.model)
@@ -77,7 +77,7 @@ class BaseRepository:
     
     async def delete(self,filter_by : BaseModel):
         objectModel = await self.searching(filter_by.model_dump(exclude_unset=True))
-        if objectModel == None:
+        if objectModel is None:
             return {"message" : "Item not found"}
         else: 
             stmt = delete(self.model).where(self.model.id == objectModel.id).returning(self.model)

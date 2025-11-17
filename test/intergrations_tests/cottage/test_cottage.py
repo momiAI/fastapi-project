@@ -1,9 +1,4 @@
 import pytest
-from datetime import date
-
-from src.route.dependency import HomePagination,DateDep
-from src.schemas.cottage import CottageAdd,CottageToDateBase,CottageUpdateToDateBase
-from src.schemas.facilities import AsociationFacilitiesCottage
 
 
 async def test_get(ac,db): 
