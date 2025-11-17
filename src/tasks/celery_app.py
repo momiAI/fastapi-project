@@ -3,10 +3,5 @@ from src.config import settings
 
 
 celery_app = Celery(
-    "tasks",
-    broker=settings.redis_url,
-    include= [
-        "src.tasks.tasks_storage"
-    ]
-
+    "tasks", broker=settings.redis_url, include=["src.tasks.tasks_storage"]
 )

@@ -2,14 +2,14 @@ from pydantic import BaseModel
 
 
 class FacilitiesCottage(BaseModel):
-    id : int
-    title : str
+    id: int
+    title: str
 
 
 class FacilitiesCottageAdd(BaseModel):
-    title : str
+    title: str
 
 
 class AsociationFacilitiesCottage(BaseModel):
-    id_facilities : int
-    id_cottage : int
+    id_facilities: int
+    id_cottage: int
