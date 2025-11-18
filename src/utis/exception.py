@@ -1,8 +1,17 @@
-class Base(Exception):
-    pass
+class BasesException(Exception):
+    detail = "Неожиданная ошибка"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(self.detail, *args, **kwargs)
 
-class CottageBooked(Base):
-    """The room is not available for booking"""
+class CottageBooked(BasesException):
+    detail = 'ER'
 
-    pass
+class TypeNumberError(BasesException):
+    detail = "Неверный формат телефона"
+
+class KeyDuplication(BasesException):
+    detail = "Объект уже существует"
+
+class ObjectNotFound(BaseException):
+    detail = "Объект не найден"

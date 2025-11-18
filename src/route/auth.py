@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, HTTPException, Response
 from src.service.auth import authservice
 from src.route.dependency import UserIdDep, DbDep
 from src.schemas.users import UserAdd, UserLogin
-
+from src.utis.exception import TypeNumberError,KeyDuplication,ObjectNotFound
 
 route = APIRouter(prefix="/auth", tags=["Авторизация и Аутенфикация"])
 
@@ -25,9 +25,12 @@ async def register_user(
         }
     ),
 ):
-    check = await db.user.check_number(data_user.phone_number)
-    if not check:
-        raise HTTPException(status_code=400, detail="Некоректные данные")
+    try:
+        await db.user.check_number(data_user.phone_number)
+    except TypeNumberError as ex: 
+        raise HTTPException(status_code=400, detail = ex.detail)
+    except KeyDuplication:
+        raise HTTPException(status_code=409, detail="Пользователь уже зарегистрирован")
     data_user_update = authservice.converts_data(data_user.model_dump())
     await db.user.insert_to_database(data_user_update)
     await db.commit()
@@ -47,10 +50,12 @@ async def login_user(
         }
     ),
 ):
-    user = await db.user.get_one_or_none(email=data_user.email)
+    try:
+        user = await db.user.get_one(email=data_user.email)
+    except ObjectNotFound:
+        raise HTTPException(status_code=404, detail="Пользователь не найден.")
     if (
-        user is None
-        or authservice.verify_password(data_user.password, user.hash_password) is False
+        authservice.verify_password(data_user.password, user.hash_password) is False
     ):
         raise HTTPException(
             status_code=401, detail="Проверьте корректность вводимых данных!"
@@ -70,4 +75,5 @@ async def logout_user(response: Response):
 
 @route.get("/get/me")
 async def get_me(db: DbDep, user_id: UserIdDep):
-    return await db.user.get_one_or_none(id=user_id)
+    return await db.user.get_one(id=user_id)
+  

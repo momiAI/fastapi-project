@@ -19,7 +19,7 @@ async def check_valid_number(phone_number: str):
     if (
         phone_number[0] == "+"
         and len(phone_number) == 11
-        and (phone_number[1] == 7 or phone_number[1] == 8)
+        and (phone_number[1] == "7" or phone_number[1] == "8")
     ):
         return True
     else:
@@ -81,7 +81,35 @@ async def booked_organization(data: BaseModel):
         .group_by(o.id)
     )
     return query
+'''with booked_cottage as (
+	select 
+		  b.id,
+	      c.id as cottage_id,
+	      c.price,
+	      b.date_start,
+	      b.date_end  
+	from 
+		booking b
+	right join 
+		cottage c 
+	on 
+	b.cottage_id = c.id
+	where b.date_start <=  '2025-11-11' and  b.date_end >=  '2025-11-09'
+)
+select bc.cottage_id 
+from 
+	cottage c 
+left join booked_cottage bc on bc.cottage_id = c.id
+where c.price = Null'''
 
+async def free_cottage(id_org: int | None, data: BaseModel):
+    query = (
+        select(b.id,c.id.label("cottage_id"),c.price,b.date_start,b.date_end)
+    .outerjoin(c,b.cottage_id == c.id)
+    .where(b.date_end >= data.date_start, b.date_start <= data.date_end)
+    .cte("booked_cottage")
+    )
+    return query
 
 def upload_image(name, image, id_cott):
     path = f"src/static/img/{str(id_cott) + name}"

@@ -1,9 +1,10 @@
 from sqlalchemy import select, insert, update, delete
+from sqlalchemy.exc import IntegrityError,NoResultFound
 from pydantic import BaseModel
 from fastapi import HTTPException
 from sqlalchemy.exc import NoResultFound
 from src.repositories.mappers.base import DataMapper
-
+from src.utis.exception import KeyDuplication,ObjectNotFound
 
 class BaseRepository:
     model = None
@@ -34,12 +35,24 @@ class BaseRepository:
         if model is None:
             return None
         return self.mapper.map_to_domain(model)
+    
+    async def get_one(self, **filter_by):
+        query = select(self.model).filter_by(**filter_by)
+        result = await self.session.execute(query)
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFound
+        return self.mapper.map_to_domain(model)
 
     async def insert_to_database(self, insert_data: BaseModel):
         stmt = (
             insert(self.model).values(**insert_data.model_dump()).returning(self.model)
         )
-        result = await self.session.execute(stmt)
+        try:
+            result = await self.session.execute(stmt)
+        except IntegrityError:
+            raise KeyDuplication
         model = result.unique().scalars().one()
         return self.mapper.map_to_domain(model)
 
@@ -92,7 +105,10 @@ class BaseRepository:
     async def get_by_id(self, id: int):
         query = select(self.model).where(self.model.id == id)
         result = await self.session.execute(query)
-        model = result.scalars().one_or_none()
+        try:
+            model = result.scalar_one()
+        except NoResultFound:
+            raise ObjectNotFound
         return self.mapper.map_to_domain(model)
 
     async def get_all_by_filter(self, **filter_by):
