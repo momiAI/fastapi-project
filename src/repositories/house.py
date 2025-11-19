@@ -1,3 +1,4 @@
+from pydantic import BaseModel
 from .base import BaseRepository
 from src.models.house import HouseModel
 from sqlalchemy import select
@@ -8,20 +9,20 @@ class HouseRepository(BaseRepository):
     model = HouseModel
     mapper = HouseMapper
 
-    async def get_selection(self, data_selection):
-        per_page = 5 or data_selection.get("per_page")
+    async def get_selection(self, data_selection : BaseModel):
+        per_page = 5 or data_selection.per_page
         query = select(self.model)
-        if data_selection.get("city"):
+        if data_selection.city:
             query = query.filter(
-                self.model.city.ilike(f"%{data_selection.get('city')}%")
+                self.model.city.ilike(data_selection.city)
             )
-        if data_selection.get("title"):
+        if data_selection.title:
             query = query.filter(
-                self.model.title.ilike(f"%{data_selection.get('title')}%")
+                self.model.title.ilike(data_selection.title)
             )
 
         query = query.limit(per_page).offset(
-            per_page * (data_selection.get("page") - 1)
+            per_page * (data_selection.page - 1)
         )
         result = await self.session.execute(query)
 

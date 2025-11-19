@@ -40,6 +40,11 @@ def get_role(token: str = Depends(get_token)):
     user_role = authservice.decode_token(token).get("user_role", None)
     return user_role
 
+def get_super_user(token: str = Depends(get_token)):
+    user_role = authservice.decode_token(token).get("user_role", None)
+    if user_role != 2:
+        raise HTTPException(status_code=403, detail="Недостаточно прав.")
+    return True
 
 def get_auth_user_id(token: str = Depends(get_token)):
     user_id = authservice.decode_token(token).get("user_id", None)
@@ -55,5 +60,6 @@ async def get_db():
 
 UserIdDep = Annotated[int, Depends(get_auth_user_id)]
 UserRoleDep = Annotated[int, Depends(get_role)]
+SuperUserDep = Annotated[bool,Depends(get_super_user)]
 DbDep = Annotated[DbManager, Depends(get_db)]
 SerchNotBook = Annotated[BaseModel, Depends(check_date)]

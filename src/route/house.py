@@ -1,8 +1,11 @@
-from fastapi import Body, APIRouter, Depends
-from src.schemas.house import HomeAdd, HomePATCH
-from route.dependency import HomeSelection
-from src.route.dependency import DbDep
+from fastapi import Body, APIRouter, Depends,HTTPException
 from fastapi_cache.decorator import cache
+from sqlalchemy.exc import DBAPIError
+
+from route.dependency import HomeSelection
+from src.schemas.house import HomeAdd, HomePATCH
+from src.route.dependency import DbDep
+from src.utis.exception import ObjectNotFound
 
 
 route = APIRouter(prefix="/house", tags=["Дома"])
@@ -10,13 +13,21 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 
 @route.get("/by/{id}", summary="Выбор объекта по айди")
 async def get_house(id: int, db: DbDep):
-    return await db.house.get_by_id(id)
-
+    try:
+        return await db.house.get_by_id(id)
+    except ObjectNotFound:
+        raise HTTPException(status_code=404, detail="Дом не найден")
+    except DBAPIError:
+        raise HTTPException(status_code=400, detail="Проверьте корректность данных")
 
 @cache
 @route.get("/selection", summary="Поиск с выборкой")
 async def get_selection_homes(db: DbDep, home_data: HomeSelection = Depends()):
-    return await db.house.get_selection(home_data.model_dump(exclude_unset=True))
+    result = await db.house.get_selection(home_data)
+    if result == []:
+        raise HTTPException(status_code=404,detail="Ничего не найдено")
+    else:
+        return {"message" : "OK", "data" : result}
 
 
 @cache

@@ -93,7 +93,7 @@ class BaseRepository:
         try:
             return self.mapper.map_to_domain(result.scalars().one())
         except NoResultFound:
-            return HTTPException(status_code=401, detail="Объект не найден")
+            return HTTPException(status_code=404, detail="Объект не найден")
 
     async def delete(self, filter_by: BaseModel):
         objectModel = await self.searching(filter_by.model_dump(exclude_unset=True))
