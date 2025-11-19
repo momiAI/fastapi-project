@@ -46,6 +46,5 @@ async def booked_cottage(
     id_org: int | None = None,
     pag: HomePagination = Depends(),
 ):
-    #result = await db.booking.free_cottage(id_org, date, pag)
-    result = await db.booking.test(id_org, date)
+    result = await db.booking.free_cottage(id_org, date, pag)
     return {"data": result}

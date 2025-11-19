@@ -24,6 +24,10 @@ class DateDep(BaseModel):
     date_start: Annotated[date, Query(today)]
     date_end: Annotated[date, Query(tomorrow)]
 
+def check_date(date : BaseModel = Depends(DateDep)):
+    if date.date_start > date.date_end:
+        raise HTTPException(status_code=400, detail="Не правильно введена дата")
+    return date
 
 def get_token(request: Request):
     token = request.cookies.get("access_token", None)
@@ -52,4 +56,4 @@ async def get_db():
 UserIdDep = Annotated[int, Depends(get_auth_user_id)]
 UserRoleDep = Annotated[int, Depends(get_role)]
 DbDep = Annotated[DbManager, Depends(get_db)]
-SerchNotBook = Annotated[BaseModel, Depends(DateDep)]
+SerchNotBook = Annotated[BaseModel, Depends(check_date)]

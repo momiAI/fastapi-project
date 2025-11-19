@@ -11,7 +11,7 @@ from src.schemas.facilities import AsociationFacilitiesCottage
 from src.schemas.images import ImageAdd, AsociationImagesCottage
 from src.repositories.utils import upload_image
 from src.tasks.tasks_storage import resize_image
-
+from src.utis.exception import ObjectNotFound,IncorrectData,IncorrectDataCottage
 
 route = APIRouter(tags=["Котетджи"])
 
@@ -20,7 +20,10 @@ route = APIRouter(tags=["Котетджи"])
     "/organization/{id_org}/cottage/{id_cott}", summary="Получение котетджа по айди"
 )
 async def get_cottage(db: DbDep, id_org: int, id_cott: int):
-    return await db.cottage.get_one_or_none(id=id_cott, organization_id=id_org)
+    try:
+        return await db.cottage.get_one_or_none(id=id_cott, organization_id=id_org)
+    except ObjectNotFound:
+        raise HTTPException(status_code=400, detail="Котетдж не найден")
 
 
 @cache(expire=20)
@@ -38,6 +41,7 @@ async def get_free_cottage(
 @route.post("/organization/{id_org}/cottage/add", summary="Добавление коттеджа")
 async def add_cottage(
     db: DbDep,
+    user : UserIdDep,
     id_org: int,
     data: CottageAdd = Body(
         openapi_examples={
@@ -56,13 +60,21 @@ async def add_cottage(
     ),
 ):
     data_update = CottageToDateBase(organization_id=id_org, **data.model_dump())
-    cottage = await db.cottage.insert_to_database(data_update)
-    await db.asociatfacilcott.insert_to_database_bulk(
-        [
-            AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i)
-            for i in data.facilities_ids
-        ]
-    )
+    try: 
+        cottage = await db.cottage.insert_to_database(data_update)
+    except IncorrectData:
+        raise HTTPException(status_code=404, detail="Организация не существует.")
+    except IncorrectDataCottage:
+        raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.")
+    try:
+        await db.asociatfacilcott.insert_to_database_bulk(
+            [
+                AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i)
+                for i in data.facilities_ids
+            ]
+        )
+    except IncorrectData:
+        raise HTTPException(status_code=404, detail="Удобство не существует.")
     await db.commit()
     return {"message": "OK", "data": cottage}
 
@@ -96,11 +108,18 @@ async def update_cottage(
         return HTTPException(
             status_code=403, detail="Пользователь не имеет право на редактирование"
         )
-    cottage = await db.cottage.patch_object(
-        id_cott, CottageUpdateToDateBase(**data.model_dump(exclude_unset=True))
-    )
+    try:
+        cottage = await db.cottage.patch_object(id_cott, CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
+    except IncorrectDataCottage:
+        raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.") 
+    except ObjectNotFound:
+        raise HTTPException(status_code=404, detail="Коттедж не найден")
+
     if data.facilities_ids:
-        await db.asociatfacilcott.patch_facilities(id_cott, data.facilities_ids)
+        try:
+            await db.asociatfacilcott.patch_facilities(id_cottage = id_cott, data=data.facilities_ids)
+        except ObjectNotFound:
+            raise HTTPException(status_code=404, detail="Удобство не найдено.")
 
     await db.session.commit()
 

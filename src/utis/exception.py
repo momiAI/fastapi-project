@@ -10,6 +10,12 @@ class CottageBooked(BasesException):
 class TypeNumberError(BasesException):
     detail = "Неверный формат телефона"
 
+class IncorrectData(BasesException):
+    detail = "Некоректные данные"
+
+class IncorrectDataCottage(BasesException):
+    detail = "Некоректные данные коттеджа"
+
 class KeyDuplication(BasesException):
     detail = "Объект уже существует"
 

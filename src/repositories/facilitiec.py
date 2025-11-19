@@ -1,4 +1,5 @@
 from sqlalchemy import select, delete, insert
+from sqlalchemy.exc import IntegrityError
 
 from src.repositories.base import BaseRepository
 from src.models.facilitiec import (
@@ -9,6 +10,7 @@ from src.repositories.mappers.mappers import (
     FacilitiesCottageMapper,
     AsociationFacilitiesCottageMapper,
 )
+from src.utis.exception import ObjectNotFound
 
 
 class FacilitiesCottageRepository(BaseRepository):
@@ -24,14 +26,24 @@ class AsociationFacilitiesCottageRepository(BaseRepository):
         query_fac = await self.session.execute(
             select(self.model.id_facilities).where(self.model.id_cottage == id_cottage)
         )
-        facilitiec_ids = [i for i in query_fac.scalars().all()]
+        facilitiec_ids = query_fac.scalars().all()
         add_facilities = set(data) - set(facilitiec_ids)
-        add_dict = [
-            {"id_cottage": id_cottage, "id_facilities": i} for i in add_facilities
-        ]
-        stmt_delete = delete(self.model).where(
-            self.model.id_cottage == id_cottage, self.model.id_facilities.in_(data)
-        )
-        stmt_inser = insert(self.model).values(add_dict)
-        await self.session.execute(stmt_delete)
-        await self.session.execute(stmt_inser)
+        if add_facilities != set():
+            add_dict = [
+                {"id_cottage": id_cottage, "id_facilities": i} for i in add_facilities
+            ]
+            stmt_delete = delete(self.model).where(
+                self.model.id_cottage == id_cottage, self.model.id_facilities.in_(data)
+            )
+            stmt_inser = insert(self.model).values(add_dict)
+            await self.session.execute(stmt_delete) 
+            try:
+                await self.session.execute(stmt_inser)
+            except IntegrityError:
+                raise ObjectNotFound
+        else:
+            stmt_delete = delete(self.model).where(
+                self.model.id_cottage == id_cottage, self.model.id_facilities.in_(data)
+            )
+            await self.session.execute(stmt_delete)             
+

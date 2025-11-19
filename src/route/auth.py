@@ -26,7 +26,7 @@ async def register_user(
     ),
 ):
     try:
-        await db.user.check_number(data_user.phone_number)
+        await db.user.check_number_and_email(data_user.phone_number,data_user.email)
     except TypeNumberError as ex: 
         raise HTTPException(status_code=400, detail = ex.detail)
     except KeyDuplication:

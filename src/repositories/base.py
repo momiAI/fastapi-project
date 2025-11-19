@@ -2,9 +2,9 @@ from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError,NoResultFound
 from pydantic import BaseModel
 from fastapi import HTTPException
-from sqlalchemy.exc import NoResultFound
+from sqlalchemy.exc import NoResultFound,DBAPIError
 from src.repositories.mappers.base import DataMapper
-from src.utis.exception import KeyDuplication,ObjectNotFound
+from src.utis.exception import IncorrectData,ObjectNotFound,IncorrectDataCottage
 
 class BaseRepository:
     model = None
@@ -52,13 +52,20 @@ class BaseRepository:
         try:
             result = await self.session.execute(stmt)
         except IntegrityError:
-            raise KeyDuplication
+            raise IncorrectData
+        except DBAPIError:
+            raise IncorrectDataCottage
         model = result.unique().scalars().one()
         return self.mapper.map_to_domain(model)
 
+
     async def insert_to_database_bulk(self, insert_data: list[int]):
         stmt = insert(self.model).values([i.model_dump() for i in insert_data])
-        await self.session.execute(stmt)
+        try:
+            await self.session.execute(stmt)
+        except IntegrityError:
+                    raise IncorrectData
+        
 
     async def edit_full(self, edit_data: BaseModel, filter_by: BaseModel):
         objectModel = await self.searching(filter_by)
@@ -120,9 +127,15 @@ class BaseRepository:
         stmt = (
             update(self.model)
             .where(self.model.id == id)
-            .values(**data_patch.model_dump(exclude_none=True))
+            .values(data_patch.model_dump(exclude_unset=True))
             .returning(self.model)
         )
-        result = await self.session.execute(stmt)
-        model = result.scalars().one_or_none()
+        try:
+            result = await self.session.execute(stmt)
+        except DBAPIError:
+            raise IncorrectDataCottage
+        try:
+            model = result.scalar_one()
+        except NoResultFound: 
+            raise ObjectNotFound
         return self.mapper.map_to_domain(model)

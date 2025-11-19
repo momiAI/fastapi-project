@@ -26,7 +26,7 @@ async def check_valid_number(phone_number: str):
         False
 
 
-async def booked_cottage(id_org: int, data: BaseModel, pag: BaseModel):
+async def booked_cottage(id_org: int | None, data: BaseModel, pag: BaseModel):
     per_page = 5 or pag.per_page
     booked_cottage = (
         select(c.id, c.price, func.count("*").label("cottage_count"))
@@ -43,7 +43,7 @@ async def booked_cottage(id_org: int, data: BaseModel, pag: BaseModel):
                 func.coalesce(booked_cottage.c.cottage_count, 0) == 0,
                 c.id.in_(select(c.id).where(c.organization_id == id_org)),
             )
-            .offset(pag.page)
+            .offset(per_page * (pag.page - 1))
             .limit(per_page)
         )
     else:
@@ -54,7 +54,7 @@ async def booked_cottage(id_org: int, data: BaseModel, pag: BaseModel):
                 func.coalesce(booked_cottage.c.cottage_count, 0) == 0,
                 c.id.in_(select(c.id)),
             )
-            .offset(pag.page * (per_page - 1))
+            .offset(per_page * (pag.page - 1))
             .limit(per_page)
         )
     return query
@@ -81,34 +81,24 @@ async def booked_organization(data: BaseModel):
         .group_by(o.id)
     )
     return query
-'''with booked_cottage as (
-	select 
-		  b.id,
-	      c.id as cottage_id,
-	      c.price,
-	      b.date_start,
-	      b.date_end  
-	from 
-		booking b
-	right join 
-		cottage c 
-	on 
-	b.cottage_id = c.id
-	where b.date_start <=  '2025-11-11' and  b.date_end >=  '2025-11-09'
-)
-select bc.cottage_id 
-from 
-	cottage c 
-left join booked_cottage bc on bc.cottage_id = c.id
-where c.price = Null'''
 
-async def free_cottage(id_org: int | None, data: BaseModel):
-    query = (
-        select(b.id,c.id.label("cottage_id"),c.price,b.date_start,b.date_end)
+
+async def free_cottage(id_org: int | None, data: BaseModel, pag : BaseModel):
+    per_page = 5 or pag.per_page
+    cte = (
+        select(b.id,c.id.label("cottage_id"),c.price,b.date_start,b.date_end,c.organization_id)
     .outerjoin(c,b.cottage_id == c.id)
     .where(b.date_end >= data.date_start, b.date_start <= data.date_end)
     .cte("booked_cottage")
     )
+    if id_org is None:
+        query = (select(c).outerjoin(cte,c.id == cte.c.cottage_id)
+                 .where(cte.c.date_start == None)
+                 .offset(per_page * (pag.page - 1)).limit(per_page))
+    else:
+        query = (select(c).outerjoin(cte,c.id == cte.c.cottage_id)
+                 .where(cte.c.date_start == None,c.organization_id == id_org)
+                 .offset(per_page * (pag.page - 1)).limit(per_page))
     return query
 
 def upload_image(name, image, id_cott):
