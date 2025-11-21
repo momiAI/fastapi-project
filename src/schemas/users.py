@@ -31,3 +31,4 @@ class UserAdd(BaseModel):
     last_name: str
     first_name: str
     phone_number: str
+

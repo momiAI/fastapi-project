@@ -9,6 +9,10 @@ from src.schemas.users import UserIncludeId
 class AuthService:
     hashed_set = PasswordHash.recommended()
 
+    def hashed_password(self, password):
+        hash_password = self.hashed_set.hash(password)
+        return hash_password
+
     def converts_data(self, data_user):
         user = UserIncludeId(
             email=data_user.get("email"),

@@ -1,4 +1,5 @@
 # ruff: noqa: E402
+import asyncio
 import pytest
 import json
 from httpx import ASGITransport, AsyncClient
@@ -17,7 +18,8 @@ from src.schemas.organization import OrganizationToDateBase
 from src.schemas.cottage import CottageAdd, CottageToDateBase
 from src.schemas.facilities import AsociationFacilitiesCottage, FacilitiesCottageAdd
 from src.schemas.booking import Booking
-
+from src.utis.createsuperuser import create_super_user
+from src.config import settings
 
 @pytest.fixture(scope="function", autouse=True)
 async def db():
@@ -74,6 +76,21 @@ async def test_register_user(ac):
     res = response.json()
     assert res["message"] == "OK"
 
+
+@pytest.fixture(scope="function",autouse=False)
+async def test_register_superuser():
+    await create_super_user()
+
+
+@pytest.fixture(scope="function",autouse=False)
+async def test_login_superuser(ac,test_register_superuser):
+    response = await ac.post(
+        "/auth/login", json={"email": settings.ADMIN_EMAIL, "password": settings.ADMIN_PASSWORD}
+    )
+    res = response.json()
+    assert response.status_code == 200
+    assert "access_token" in res
+    yield ac
 
 @pytest.fixture(scope="session", autouse=True)
 async def test_auth_user_ac(ac, test_register_user):

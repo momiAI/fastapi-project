@@ -3,8 +3,8 @@ async def test_get_all(ac):
     assert response.status_code == 200
 
 
-async def test_facilities_for_cottage_add(ac):
-    response = await ac.post("/facilitiec/cottage/add", json={"title": "Барбекю"})
+async def test_facilities_for_cottage_add(test_login_superuser):
+    response = await test_login_superuser.post("/facilitiec/cottage/add", json={"title": "Барбекю"})
     res = response.json()
     assert response.status_code == 200
     assert res["message"] == "OK"

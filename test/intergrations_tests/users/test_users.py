@@ -4,10 +4,10 @@ import pytest
 @pytest.mark.parametrize(
     "email,password,last_name,first_name,phone_number,status_code",
     [
-        ("test@example.ru", "password", "Last", "User", "+7856732341", 200),
-        ("tes1t@example.ru", "password", "Last", "User", "+7856732341", 400),
-        ("te111st@example.ru", "password", "Last", "User", "+7856732341", 400),
-        ("test1@example.ru", "password", "Last", "User", "+7856732341", 400),
+        ("example@example.ru", "password", "Last", "User", "+71234567891", 200),
+        ("tes1t@example.ru", "password", "Last", "User", "+71234567890", 409),
+        ("te111st@example.ru", "password", "Last", "User", "+72134567890", 200),
+        ("te111st@example.ru", "password", "Last", "User", "+72135467890", 409),
         ("te1st@example.ru", "password", "Last", "User", "+7856732341", 400),
         ("test165example.ru", "password", "Last", "User", "+7956732341", 422),
         ("test165@example.ru", "password", "Last", "User", "+7956732341", 200),
