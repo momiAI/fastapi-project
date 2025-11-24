@@ -1,5 +1,5 @@
 from sqlalchemy import select,or_
-from sqlalchemy.exc import NoResultFound,MultipleResultsFound
+
 
 from .base import BaseRepository
 from src.models.users import UsersModel

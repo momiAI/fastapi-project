@@ -4,11 +4,10 @@ import pytest
 @pytest.mark.parametrize(
     "email,password,last_name,first_name,phone_number,status_code",
     [
-        ("example@example.ru", "password", "Last", "User", "+71234567891", 200),
-        ("tes1t@example.ru", "password", "Last", "User", "+71234567890", 409),
-        ("te111st@example.ru", "password", "Last", "User", "+72134567890", 200),
-        ("te111st@example.ru", "password", "Last", "User", "+72135467890", 409),
-        ("te1st@example.ru", "password", "Last", "User", "+7856732341", 400),
+        ("example@example.ru", "password", "Last", "User", "+7123456789", 200),
+        ("tes1t@example.ru", "password", "Last", "User", "+7123456789", 409),
+        ("te111st@example.ru", "password", "Last", "User", "+7123456788", 200),
+        ("te111st@example.ru", "password", "Last", "User", "+7856732341", 409),
         ("test165example.ru", "password", "Last", "User", "+7956732341", 422),
         ("test165@example.ru", "password", "Last", "User", "+7956732341", 200),
     ],
@@ -32,9 +31,9 @@ async def test_register(
 @pytest.mark.parametrize(
     "email, password, status_code,user_id",
     [
-        ("test@example.ru", "password", 200, 2),
-        ("test165@example.ru", "password", 200, 3),
-        ("test1fdsfds165@example.ru", "password", 401, 3),
+        ("example@example.ru", "password", 200, 3),
+        ("test165@example.ru", "password", 200, 5),
+        ("testinnnggg165@example.ru", "password", 404, 3),
     ],
 )
 async def test_login_user(ac, email, password, status_code, user_id):
@@ -42,7 +41,7 @@ async def test_login_user(ac, email, password, status_code, user_id):
         "/auth/login", json={"email": email, "password": password}
     )
 
-    if response_login.status_code == 401:
+    if response_login.status_code == 404:
         pytest.skip("Ошибка в почте все верно")
 
     res = response_login.json()

@@ -93,11 +93,11 @@ async def free_cottage(id_org: int | None, data: BaseModel, pag : BaseModel):
     )
     if id_org is None:
         query = (select(c).outerjoin(cte,c.id == cte.c.cottage_id)
-                 .where(cte.c.date_start == None)
+                 .where(cte.c.date_start is None)
                  .offset(per_page * (pag.page - 1)).limit(per_page))
     else:
         query = (select(c).outerjoin(cte,c.id == cte.c.cottage_id)
-                 .where(cte.c.date_start == None,c.organization_id == id_org)
+                 .where(cte.c.date_start is None,c.organization_id == id_org)
                  .offset(per_page * (pag.page - 1)).limit(per_page))
     return query
 

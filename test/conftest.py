@@ -1,5 +1,4 @@
 # ruff: noqa: E402
-import asyncio
 import pytest
 import json
 from httpx import ASGITransport, AsyncClient
@@ -19,7 +18,7 @@ from src.schemas.cottage import CottageAdd, CottageToDateBase
 from src.schemas.facilities import AsociationFacilitiesCottage, FacilitiesCottageAdd
 from src.schemas.booking import Booking
 from src.utis.createsuperuser import create_super_user
-from src.config import settings
+
 
 @pytest.fixture(scope="function", autouse=True)
 async def db():

@@ -4,7 +4,7 @@ from datetime import date
 
 from src.repositories.base import BaseRepository
 from src.models.booking import BookingModel
-from src.repositories.utils import booked_cottage, booked_cottages,free_cottage
+from src.repositories.utils import booked_cottage, booked_cottages
 from src.repositories.mappers.mappers import BookingMapper
 
 

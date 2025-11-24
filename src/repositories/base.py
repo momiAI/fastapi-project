@@ -1,8 +1,7 @@
 from sqlalchemy import select, insert, update, delete
-from sqlalchemy.exc import IntegrityError,NoResultFound
+from sqlalchemy.exc import IntegrityError,NoResultFound,DBAPIError
 from pydantic import BaseModel
 from fastapi import HTTPException
-from sqlalchemy.exc import NoResultFound,DBAPIError
 from src.repositories.mappers.base import DataMapper
 from src.utis.exception import IncorrectData,ObjectNotFound,IncorrectDataCottage
 
