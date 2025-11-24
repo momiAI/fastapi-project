@@ -113,7 +113,7 @@ async def update_cottage(
         )
     try:
         cottage = await db.cottage.patch_object(id_cott, CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
-    except IncorrectDataCottage:
+    except IncorrectData:
         raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.") 
     except ObjectNotFound:
         logging.debug(f"Не удалось найти коттедж с id : {data.cottage_id}")

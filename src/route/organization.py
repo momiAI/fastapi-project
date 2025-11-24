@@ -1,10 +1,12 @@
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body,HTTPException
 from src.route.dependency import UserIdDep, DbDep, SerchNotBook
 from src.schemas.organization import (
     OrganizationAdd,
     OrganizationUpdate,
     OrganizationToDateBase,
 )
+from src.utis.exception import IncorrectData,ObjectNotFound
+from src.service.organization import OrganizationService
 
 
 route = APIRouter(prefix="/organization", tags=["Организация"])
@@ -12,7 +14,7 @@ route = APIRouter(prefix="/organization", tags=["Организация"])
 
 @route.get("/booked", summary="Свободные организации по дате")
 async def not_booked(db: DbDep, data: SerchNotBook):
-    result = await db.organization.get_free_organization_by_cottage(data)
+    result = await OrganizationService(db).not_booked(data)
     return {"message": "OK", "data": result}
 
 
@@ -34,17 +36,17 @@ async def add_organization(
         }
     ),
 ):
-    update_data = OrganizationToDateBase(user_id=user_id, **data.model_dump())
-    result = await db.organization.insert_to_database(update_data)
-    await db.commit()
-    return result
+    
+    return await OrganizationService(db).add_organization(user_id,data)
 
 
 @route.delete("/delete/{id}", summary="Удаление организации")
 async def delete_organization(db: DbDep, id: int):
-    result = await db.organization.delete_by_id(id)
-    await db.commit()
-    return result
+    try:
+        return await OrganizationService(db).delete_organization(id)
+    except ObjectNotFound:
+        return HTTPException(status_code=404, detail="Отель не найден")
+
 
 
 @route.patch("/update/{id}", summary="Обновление организации")
@@ -63,6 +65,10 @@ async def update_organization(
         }
     ),
 ):
-    result = await db.organization.patch_object(id, data)
-    await db.commit()
-    return result
+    try:
+        result = await OrganizationService(db).update_organization(id,data)
+        await db.commit()
+        return result
+    except IncorrectData:
+        return HTTPException(status_code=400, detail="Некоректная дата отеля")
+

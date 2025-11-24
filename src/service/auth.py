@@ -4,9 +4,9 @@ from datetime import datetime, timedelta, timezone
 from pwdlib import PasswordHash
 from src.config import settings
 from src.schemas.users import UserIncludeId
+from src.service.base import BaseService
 
-
-class AuthService:
+class AuthService(BaseService):
     hashed_set = PasswordHash.recommended()
 
     def hashed_password(self, password):

@@ -6,7 +6,7 @@ from route.dependency import HomeSelection
 from src.schemas.house import HomeAdd, HomePATCH
 from src.route.dependency import DbDep
 from src.utis.exception import ObjectNotFound
-
+from src.service.house import HouseService
 
 route = APIRouter(prefix="/house", tags=["Дома"])
 
@@ -14,7 +14,7 @@ route = APIRouter(prefix="/house", tags=["Дома"])
 @route.get("/by/{id}", summary="Выбор объекта по айди")
 async def get_house(id: int, db: DbDep):
     try:
-        return await db.house.get_by_id(id)
+        return await HouseService(db).get_house(id)
     except ObjectNotFound:
         raise HTTPException(status_code=404, detail="Дом не найден")
     except DBAPIError:
@@ -23,7 +23,7 @@ async def get_house(id: int, db: DbDep):
 @cache
 @route.get("/selection", summary="Поиск с выборкой")
 async def get_selection_homes(db: DbDep, home_data: HomeSelection = Depends()):
-    result = await db.house.get_selection(home_data)
+    result = await HouseService(db).get_selection_homes(home_data)
     if result == []:
         raise HTTPException(status_code=404,detail="Ничего не найдено")
     else:
@@ -33,12 +33,12 @@ async def get_selection_homes(db: DbDep, home_data: HomeSelection = Depends()):
 @cache
 @route.get("/all", summary="Вывод всех домов")
 async def get_homes(db: DbDep):
-    return await db.house.get_all()
+    return await HouseService(db).get_homes()
 
 
 @route.delete("/delete/{id_house}", summary="Удаление по айди")
 async def delete_home(db: DbDep, id_house: int):
-    result = await db.house.delete_by_id(id_house)
+    result = await HouseService(db).delete_home(id_house)
     await db.commit()
     return {"status": "OK", "data": result}
 
@@ -65,7 +65,7 @@ async def post_home(
         }
     ),
 ):
-    result = await db.house.insert_to_database(home_data)
+    result = await HouseService(db).post_home(home_data)
     await db.commit()
     return {"status": "OK", "data": result}
 
@@ -105,7 +105,7 @@ async def put_home(
         }
     ),
 ):
-    result = await db.house.edit_full(home_data, home_search)
+    result = await HouseService(db).put_home(home_data, home_search)
     await db.commit()
     return {"status": "OK", "data": result}
 
@@ -124,6 +124,6 @@ async def patch_home(
         }
     ),
 ):
-    result = await db.house.patch_object(home_id, home_data)
+    result = await HouseService(db).patch_home(home_id, home_data)
     await db.commit()
     return {"status": "OK", "data": result}

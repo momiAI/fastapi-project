@@ -137,7 +137,7 @@ class BaseRepository:
             result = await self.session.execute(stmt)
         except DBAPIError:
             logging.debug(f"Некоректная дата : {data_patch.model_dump()}")
-            raise IncorrectDataCottage
+            raise IncorrectData
         try:
             model = result.scalar_one()
         except NoResultFound: 
