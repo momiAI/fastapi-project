@@ -1,3 +1,4 @@
+import logging
 from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import IntegrityError,NoResultFound,DBAPIError
 from pydantic import BaseModel
@@ -51,8 +52,10 @@ class BaseRepository:
         try:
             result = await self.session.execute(stmt)
         except IntegrityError:
+            logging.debug(f"Некоректная дата : {insert_data.model_dump()}")
             raise IncorrectData
         except DBAPIError:
+            
             raise IncorrectDataCottage
         model = result.unique().scalars().one()
         return self.mapper.map_to_domain(model)
@@ -63,7 +66,8 @@ class BaseRepository:
         try:
             await self.session.execute(stmt)
         except IntegrityError:
-                    raise IncorrectData
+                logging.debug(f"Некоректная дата : {insert_data.model_dump()}")
+                raise IncorrectData
         
 
     async def edit_full(self, edit_data: BaseModel, filter_by: BaseModel):
@@ -132,6 +136,7 @@ class BaseRepository:
         try:
             result = await self.session.execute(stmt)
         except DBAPIError:
+            logging.debug(f"Некоректная дата : {data_patch.model_dump()}")
             raise IncorrectDataCottage
         try:
             model = result.scalar_one()

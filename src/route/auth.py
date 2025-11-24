@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Body, HTTPException, Response
 from src.service.auth import authservice
 from src.route.dependency import UserIdDep, DbDep
@@ -27,7 +28,7 @@ async def register_user(
 ):
     try:
         await db.user.check_number_and_email(data_user.phone_number,data_user.email)
-    except TypeNumberError as ex: 
+    except TypeNumberError as ex:
         raise HTTPException(status_code=400, detail = ex.detail)
     except KeyDuplication:
         raise HTTPException(status_code=409, detail="Пользователь уже зарегистрирован")
@@ -53,6 +54,7 @@ async def login_user(
     try:
         user = await db.user.get_one(email=data_user.email)
     except ObjectNotFound:
+        logging.debug(f"Не удалось найти пользователя : {data_user.email}")
         raise HTTPException(status_code=404, detail="Пользователь не найден.")
     if (
         authservice.verify_password(data_user.password, user.hash_password) is False

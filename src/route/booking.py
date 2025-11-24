@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, HTTPException, Depends
 from src.route.dependency import UserIdDep, DbDep, UserRoleDep, SerchNotBook
 from src.schemas.booking import BookingRequest, Booking
@@ -27,6 +28,7 @@ async def book_cottage(user_id: UserIdDep, db: DbDep, data: BookingRequest):
     try:
         cottage = await db.cottage.get_by_id(data.cottage_id)
     except ObjectNotFound:
+        logging.debug(f"Не удалось найти коттедж с id : {data.cottage_id}")
         raise HTTPException(status_code=404, detail="Коттетдж не найден")
     check = await db.booking.booked_cottage_or_no(
         data.cottage_id, data.date_start, data.date_end

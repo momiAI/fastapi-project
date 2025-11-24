@@ -30,7 +30,7 @@ class CottageRepository(BaseRepository):
             result = await self.session.execute(query)
         except DBAPIError:
             raise ObjectNotFound
-
+        
         model = result.unique().scalars().one_or_none()
         if model is None:
             return {"message": "Объект не найден"}

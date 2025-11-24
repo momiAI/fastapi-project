@@ -1,10 +1,14 @@
 import uvicorn
 import sys
+import logging
+
 from fastapi import FastAPI
 from pathlib import Path
 from contextlib import asynccontextmanager
 
 sys.path.append(str(Path(__file__).parent.parent))
+logging.basicConfig(level=logging.DEBUG)
+
 from src import redis_manager
 from route.house import route as route_house
 from route.auth import route as route_auth
@@ -17,8 +21,10 @@ from route.facilitiec import route as route_facilities
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await redis_manager.connect()
+    logging.info("Подключился к Redis")
     yield
     await redis_manager.close()
+    logging.info("Отключился к Redis")
 
 
 app = FastAPI(lifespan=lifespan)

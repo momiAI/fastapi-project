@@ -1,3 +1,4 @@
+import logging
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body, HTTPException, Depends, UploadFile
 from src.route.dependency import UserIdDep, DbDep, SerchNotBook, HomePagination
@@ -23,6 +24,7 @@ async def get_cottage(db: DbDep, id_org: int, id_cott: int):
     try:
         return await db.cottage.get_one_or_none(id=id_cott, organization_id=id_org)
     except ObjectNotFound:
+        logging.debug(f"Не удалось найти коттедж с id : {id_cott.cottage_id}")        
         raise HTTPException(status_code=400, detail="Котетдж не найден")
 
 
@@ -105,6 +107,7 @@ async def update_cottage(
         id_org=id_org, id_user=id_user
     )
     if not verify:
+        logging.warning(f"Пользователь с {id_user=} попытался обновить организацию не пренадлежащую ему")
         return HTTPException(
             status_code=403, detail="Пользователь не имеет право на редактирование"
         )
@@ -113,6 +116,7 @@ async def update_cottage(
     except IncorrectDataCottage:
         raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.") 
     except ObjectNotFound:
+        logging.debug(f"Не удалось найти коттедж с id : {data.cottage_id}")
         raise HTTPException(status_code=404, detail="Коттедж не найден")
 
     if data.facilities_ids:
@@ -135,6 +139,8 @@ async def add_img_cottage(db: DbDep, id_cott: int, images: UploadFile):
         AsociationImagesCottage(id_img=img_stmt.id, id_cottage=id_cott)
     )
     path = upload_image(images.filename, images.file, id_cott)
+    logging.info(f"Начинаю обрабатывать изображения")
     resize_image.delay(path)
+    logging.info(f"Закончил обрабатывать изображения")
     await db.session.commit()
     return {"message": "OK"}
