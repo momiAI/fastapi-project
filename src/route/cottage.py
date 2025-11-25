@@ -12,7 +12,8 @@ from src.schemas.facilities import AsociationFacilitiesCottage
 from src.schemas.images import ImageAdd, AsociationImagesCottage
 from src.repositories.utils import upload_image
 from src.tasks.tasks_storage import resize_image
-from src.utis.exception import ObjectNotFound,IncorrectData,IncorrectDataCottage
+from src.utis.exception import FacilitiesNotFound, ObjectNotFound,IncorrectData,IncorrectDataCottage,CottageNotFound, OrganizationNotFound, UserHasNotPermission
+from src.service.cottage import CottageService
 
 route = APIRouter(tags=["Котетджи"])
 
@@ -22,9 +23,8 @@ route = APIRouter(tags=["Котетджи"])
 )
 async def get_cottage(db: DbDep, id_org: int, id_cott: int):
     try:
-        return await db.cottage.get_one_or_none(id=id_cott, organization_id=id_org)
-    except ObjectNotFound:
-        logging.debug(f"Не удалось найти коттедж с id : {id_cott.cottage_id}")        
+        return await CottageService(db).get_cottage(id_org,id_cott)
+    except CottageNotFound:        
         raise HTTPException(status_code=400, detail="Котетдж не найден")
 
 
@@ -36,7 +36,9 @@ async def get_free_cottage(
     pag: HomePagination = Depends(),
     id_org: int | None = None,
 ):
-    result = await db.cottage.get_free_cottage(id_org, data, pag)
+    result = await CottageService(db).get_free_cottage(data,pag,id_org)
+    if result == []:
+        raise HTTPException(status_code=404, detail="Свободных отелей на данную дату нет.")
     return {"message": "OK", "data": result}
 
 
@@ -60,24 +62,16 @@ async def add_cottage(
             }
         }
     ),
-):
-    data_update = CottageToDateBase(organization_id=id_org, **data.model_dump())
-    try: 
-        cottage = await db.cottage.insert_to_database(data_update)
-    except IncorrectData:
-        raise HTTPException(status_code=404, detail="Организация не существует.")
-    except IncorrectDataCottage:
-        raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.")
+):  
     try:
-        await db.asociatfacilcott.insert_to_database_bulk(
-            [
-                AsociationFacilitiesCottage(id_cottage=cottage.id, id_facilities=i)
-                for i in data.facilities_ids
-            ]
-        )
-    except IncorrectData:
-        raise HTTPException(status_code=404, detail="Удобство не существует.")
-    await db.commit()
+        cottage = await CottageService(db).add_cottage(id_org,data)
+    except OrganizationNotFound as ex:
+        raise HTTPException(status_code=404, detail=ex.detail)
+    except IncorrectDataCottage as ex:
+        raise HTTPException(status_code=400, detail=ex.detail)
+    except FacilitiesNotFound as ex:
+        raise HTTPException(status_code=404, detail=ex.detail)
+        
     return {"message": "OK", "data": cottage}
 
 
@@ -103,44 +97,21 @@ async def update_cottage(
         }
     ),
 ):
-    verify = await db.organization.get_access_user_by_org(
-        id_org=id_org, id_user=id_user
-    )
-    if not verify:
-        logging.warning(f"Пользователь с {id_user=} попытался обновить организацию не пренадлежащую ему")
-        return HTTPException(
-            status_code=403, detail="Пользователь не имеет право на редактирование"
-        )
     try:
-        cottage = await db.cottage.patch_object(id_cott, CottageUpdateToDateBase(**data.model_dump(exclude_unset=True)))
-    except IncorrectData:
-        raise HTTPException(status_code=400, detail="Превышино количество вводимых символов.") 
-    except ObjectNotFound:
-        logging.debug(f"Не удалось найти коттедж с id : {data.cottage_id}")
-        raise HTTPException(status_code=404, detail="Коттедж не найден")
-
-    if data.facilities_ids:
-        try:
-            await db.asociatfacilcott.patch_facilities(id_cottage = id_cott, data=data.facilities_ids)
-        except ObjectNotFound:
-            raise HTTPException(status_code=404, detail="Удобство не найдено.")
-
-    await db.session.commit()
+        cottage = await CottageService(db).update_cottage(id_org,id_cott,id_user,data)
+    except UserHasNotPermission as ex:
+        raise HTTPException(status_code=403, detail=ex.detail)
+    except IncorrectDataCottage as ex:
+        raise HTTPException(status_code=400, detail=ex.detail)
+    except CottageNotFound as ex:
+        raise HTTPException(status_code=404, detail=ex.detail)
+    except FacilitiesNotFound as ex:
+        raise HTTPException(status_code=404, detail=ex.detail)
 
     return {"message": "OK", "data": cottage}
 
 
 @route.post("/cottage/{id_cott}/add-img", summary="Добавления картинки к котетджу")
 async def add_img_cottage(db: DbDep, id_cott: int, images: UploadFile):
-    img_stmt = await db.images.insert_to_database(
-        ImageAdd(name_img=str(id_cott) + str(images.filename))
-    )
-    await db.asociatimagecottage.insert_to_database(
-        AsociationImagesCottage(id_img=img_stmt.id, id_cottage=id_cott)
-    )
-    path = upload_image(images.filename, images.file, id_cott)
-    logging.info(f"Начинаю обрабатывать изображения")
-    resize_image.delay(path)
-    logging.info(f"Закончил обрабатывать изображения")
-    await db.session.commit()
+    await CottageService(db).add_img_cottage(id_cott,images)
     return {"message": "OK"}

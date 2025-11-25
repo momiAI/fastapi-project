@@ -1,23 +1,41 @@
-class BasesException(Exception):
+class CustomException(Exception):
     detail = "Неожиданная ошибка"
 
     def __init__(self, *args, **kwargs):
         super().__init__(self.detail, *args, **kwargs)
 
-class CottageBooked(BasesException):
+class CottageBooked(CustomException):
     detail = 'ER'
 
-class TypeNumberError(BasesException):
+class AccessDenied(CustomException):
+    detail = "Недостаточно прав"
+
+class TypeNumberError(CustomException):
     detail = "Неверный формат телефона"
 
-class IncorrectData(BasesException):
+class IncorrectData(CustomException):
     detail = "Некоректные данные"
 
-class IncorrectDataCottage(BasesException):
+class OrganizationNotFound(IncorrectData):
+    detail = "Организация не существует"
+
+class FacilitiesNotFound(CustomException):
+    detail = "Удобство не найдено."
+
+class IncorrectDataCottage(CustomException):
     detail = "Некоректные данные коттеджа"
 
-class KeyDuplication(BasesException):
+class UserHasNotPermission(CustomException):
+    detail = "Пользователь не имеет право на редактирование"
+
+class KeyDuplication(CustomException):
     detail = "Объект уже существует"
 
-class ObjectNotFound(BaseException):
+class ObjectNotFound(CustomException):
     detail = "Объект не найден"
+
+class CottageNotFound(ObjectNotFound):
+    detail = "Коттедж не найден"
+
+class CottageBook(CustomException):
+    detail = "Коттедж забронирован"

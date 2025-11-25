@@ -55,7 +55,6 @@ class BaseRepository:
             logging.debug(f"Некоректная дата : {insert_data.model_dump()}")
             raise IncorrectData
         except DBAPIError:
-            
             raise IncorrectDataCottage
         model = result.unique().scalars().one()
         return self.mapper.map_to_domain(model)
