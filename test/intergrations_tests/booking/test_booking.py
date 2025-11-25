@@ -19,7 +19,7 @@ async def test_book_me(test_auth_user_ac):
 
 @pytest.mark.parametrize(
     "cottage_id,date_start ,date_end , status_code",
-    [(1, "2025-11-07", "2025-11-08", 200), (1, "2025-11-07", "2025-11-08", 401)],
+    [(1, "2025-11-07", "2025-11-08", 200), (1, "2025-11-07", "2025-11-08", 409)],
 )
 async def test_book_cottage(
     cottage_id, date_start, date_end, status_code, test_auth_user_ac
@@ -43,7 +43,7 @@ async def test_booked_cottage(test_auth_user_ac):
     "cottage_id, date_start, date_end, count, status_code",
     [
         (1, "2025-11-07", "2025-11-08", 1, 200),
-        (1, "2025-11-07", "2025-11-08", 1, 401),
+        (1, "2025-11-07", "2025-11-08", 1, 409),
         (1, "2025-11-09", "2025-11-10", 2, 200),
     ],
 )

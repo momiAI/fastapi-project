@@ -1,18 +1,11 @@
-import logging
 from fastapi_cache.decorator import cache
 from fastapi import APIRouter, Body, HTTPException, Depends, UploadFile
 from src.route.dependency import UserIdDep, DbDep, SerchNotBook, HomePagination
 from src.schemas.cottage import (
     CottageAdd,
-    CottageUpdate,
-    CottageToDateBase,
-    CottageUpdateToDateBase,
+    CottageUpdate
 )
-from src.schemas.facilities import AsociationFacilitiesCottage
-from src.schemas.images import ImageAdd, AsociationImagesCottage
-from src.repositories.utils import upload_image
-from src.tasks.tasks_storage import resize_image
-from src.utis.exception import FacilitiesNotFound, ObjectNotFound,IncorrectData,IncorrectDataCottage,CottageNotFound, OrganizationNotFound, UserHasNotPermission
+from src.utis.exception import FacilitiesNotFound,IncorrectDataCottage,CottageNotFound, OrganizationNotFound, UserHasNotPermission
 from src.service.cottage import CottageService
 
 route = APIRouter(tags=["Котетджи"])

@@ -1,7 +1,7 @@
 
 
 import logging
-from src.route.dependency import SerchNotBook, UserIdDep, UserRoleDep
+from src.route.dependency import HomePagination, SerchNotBook, UserIdDep, UserRoleDep
 from src.schemas.booking import Booking, BookingRequest
 from src.service.base import BaseService
 from src.utis.exception import AccessDenied, ObjectNotFound,CottageNotFound,CottageBook
@@ -19,7 +19,6 @@ class BookingService(BaseService):
         return await self.db.booking.get_all_by_filter(user_id=user_id)
 
 
-
     async def book_cottage(self,user_id: UserIdDep,data: BookingRequest):
         try:
             cottage = await self.db.cottage.get_by_id(data.cottage_id)
@@ -34,13 +33,14 @@ class BookingService(BaseService):
         data_update = Booking(price=cottage.price, user_id=user_id, **data.model_dump())
         result = await self.db.booking.insert_to_database(data_update)
         await self.db.commit()
-        return {"message": "OK", "data": result}
+        return result
 
 
     async def booked_cottage(
+        self,
         date: SerchNotBook,
-        id_org: int | None = None,
-        pag: HomePagination = Depends(),
+        id_org: int | None,
+        pag: HomePagination
     ):
-        result = await db.booking.free_cottage(id_org, date, pag)
-        return {"data": result}
+        result = await self.db.booking.free_cottage(id_org, date, pag)
+        return result

@@ -2,8 +2,7 @@ from fastapi import APIRouter, Body,HTTPException
 from src.route.dependency import UserIdDep, DbDep, SerchNotBook
 from src.schemas.organization import (
     OrganizationAdd,
-    OrganizationUpdate,
-    OrganizationToDateBase,
+    OrganizationUpdate
 )
 from src.utis.exception import IncorrectData,ObjectNotFound
 from src.service.organization import OrganizationService

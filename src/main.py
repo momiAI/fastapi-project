@@ -8,7 +8,7 @@ from contextlib import asynccontextmanager
 
 sys.path.append(str(Path(__file__).parent.parent))
 logging.basicConfig(level=logging.DEBUG)
-
+# ruff: noqa: E402
 from src import redis_manager
 from route.house import route as route_house
 from route.auth import route as route_auth

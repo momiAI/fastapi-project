@@ -1,4 +1,3 @@
-from src.route.dependency import SuperUserDep
 from src.schemas.facilities import FacilitiesCottageAdd
 from src.service.base import BaseService
 
