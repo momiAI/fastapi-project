@@ -7,4 +7,4 @@ RUN pip install -r req.txt
 COPY . .
 
 
-CMD ["python", "src/main.py"]
+CMD alembic upgrade head;python src/main.py
