@@ -24,7 +24,7 @@ services:
     image: postgres:17.6 
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 1
+      POSTGRES_PASSWORD: abcde1234
       POSTGRES_DB: house
     ports:
       - 6432:5432
@@ -34,6 +34,16 @@ services:
       - pg-data:/var/lib/postgresql/data 
     env_file:
       - .envdocker
+
+  app_ngnix_service:
+    container_name: "app_ngnix"
+    image: nginx
+    networks:
+      - localNetwork
+    ports:
+      - 80:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
 
 networks:
   localNetwork:
