@@ -65,7 +65,7 @@ class BaseRepository:
         try:
             await self.session.execute(stmt)
         except IntegrityError:
-                logging.debug(f"Некоректная дата : {insert_data.model_dump()}")
+                logging.debug(f"Некоректная дата : {insert_data}")
                 raise IncorrectData
         
 

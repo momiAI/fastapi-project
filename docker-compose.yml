@@ -1,11 +1,7 @@
 services:
   app_back_service:
     container_name: "app_back"
-
     build: .
-
-    ports:
-      - 8888:8000
     networks:
       - localNetwork
     env_file:
@@ -24,7 +20,7 @@ services:
     image: postgres:17.6 
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: abcde1234
+      POSTGRES_PASSWORD: 1
       POSTGRES_DB: house
     ports:
       - 6432:5432
